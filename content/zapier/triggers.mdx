@@ -1,0 +1,59 @@
+export const meta = {
+  title: "Zapier triggers",
+  description: "Events in Wundertre that can kick off a Zap.",
+};
+
+Triggers fire your Zap whenever something happens in Wundertre. Each trigger maps to a [webhook event type](/webhooks/events) under the hood.
+
+## New Contact
+
+Fires when a new contact is created — manually, via import, via API, or via another Zap.
+
+- **Event type**: `contact.created`
+- **Sample fields**: `id`, `email`, `first_name`, `last_name`, `phone`, `company`, `tags`, `lifecycle_stage`, `created_at`
+
+Common uses: add new leads to a Google Sheet, post to a Slack channel, send a welcome email.
+
+## Contact Updated
+
+Fires when any field on an existing contact changes.
+
+- **Event type**: `contact.updated`
+- **Sample fields**: full contact + a `changes` object listing the fields that changed
+
+<Callout type="tip">
+To avoid noisy Zaps, add a Zapier **Filter** step that only continues when a specific field (e.g. <code>lifecycle_stage</code>) changes.
+</Callout>
+
+## Tag Added to Contact
+
+Fires when one or more tags are added to a contact.
+
+- **Event type**: `contact.tag_added`
+- **Optional filter**: limit to a specific tag (e.g. `vip`)
+- **Sample fields**: contact + `added_tags`
+
+Great for tag‑driven automations like "when tagged `vip`, alert the account team".
+
+## Contact Enriched
+
+Fires when Wundertre's enrichment service adds new data (company, job title, LinkedIn, technographics) to a contact.
+
+- **Event type**: `contact.enriched`
+- **Sample fields**: contact + `enriched_fields` (list of fields that gained values)
+
+## Note Added to Contact
+
+Fires when a note is added to a contact's timeline.
+
+- **Event type**: `contact.note_added`
+- **Sample fields**: `contact_id`, `actor_id`, `body`, `created_at`
+
+## New Deal
+
+Fires when a new deal is created.
+
+- **Event type**: `deal.created`
+- **Sample fields**: `id`, `title`, `value`, `currency`, `stage`, `contact_id`, `owner_id`, `expected_close_date`
+
+You can also catch **deal stage changes** by using the **Contact Updated** trigger plus a filter on `stage` if you want a single Zap per pipeline movement.
