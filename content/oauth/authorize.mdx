@@ -5,6 +5,10 @@ export const meta = {
 
 <MethodBadge method="GET" path="/oauth-authorize" />
 
+<Callout type="info">
+These endpoints are used by third-party OAuth integrations (such as Zapier). If you are building a direct server integration, use an [API key](/authentication#2-api-keys) instead.
+</Callout>
+
 Redirect the user's browser to this endpoint to begin the OAuth flow. WundertreOS validates the request, then renders an in‑app consent screen where the user picks an organization and approves your requested scopes. On approval, the user is redirected back to your `redirect_uri` with an authorization code.
 
 ## Query parameters

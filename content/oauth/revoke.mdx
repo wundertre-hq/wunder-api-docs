@@ -5,6 +5,10 @@ export const meta = {
 
 <MethodBadge method="POST" path="/oauth-revoke" />
 
+<Callout type="info">
+These endpoints are used by third-party OAuth integrations (such as Zapier). If you are building a direct server integration, use an [API key](/authentication#2-api-keys) instead.
+</Callout>
+
 <TryIt method="POST" path="/oauth-revoke" body={`{
   "token": "ACCESS_OR_REFRESH_TOKEN"
 }`} />
