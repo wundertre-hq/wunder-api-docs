@@ -11,7 +11,7 @@ export const meta = {
 }`} />
 
 
-Requires the `webhooks:write` scope. Implements the Zapier [REST Hooks](https://zapier.com/developer/documentation/v2/rest-hooks/) subscribe contract.
+Requires both `webhooks:read` and `webhooks:write` scopes (every `/api-webhook-subscriptions` request checks `webhooks:read` first, then POST additionally checks `webhooks:write`). Implements the Zapier [REST Hooks](https://zapier.com/developer/documentation/v2/rest-hooks/) subscribe contract.
 
 ## Request body
 
