@@ -1,0 +1,70 @@
+export const meta = {
+  title: "Rate Limits & Best Practices",
+  description: "How requests are throttled and how to design a reliable integration.",
+};
+
+## Rate limits
+
+The API uses a sliding‑window rate limit per credential:
+
+| Credential | Limit |
+| --- | --- |
+| OAuth Bearer token | **600 requests / minute** |
+| API key | **1,200 requests / minute** |
+| Webhook delivery retries | up to 5 attempts with exponential backoff |
+
+Every response includes rate‑limit headers:
+
+```text
+X-RateLimit-Limit: 600
+X-RateLimit-Remaining: 587
+X-RateLimit-Reset: 1747500000
+```
+
+When you exceed the limit you'll receive `429 Too Many Requests`:
+
+```json
+{
+  "error": "rate_limited",
+  "message": "Too many requests. Retry after 12 seconds.",
+  "retry_after": 12
+}
+```
+
+Respect the `Retry-After` header — backoff at least that long before retrying.
+
+## Best practices
+
+### Use webhooks instead of polling
+
+For change notifications, subscribe to [webhook events](/webhooks/events). Polling `GET /api-contacts?updated_since=...` works, but webhooks are lower‑latency and cheaper.
+
+### Batch where possible
+
+Prefer one paginated list call over many `GET /:id` calls.
+
+### Use `updated_since` for delta syncs
+
+```bash
+GET /api-contacts?updated_since=2026-05-17T00:00:00Z
+```
+
+### Handle 5xx and 429 with exponential backoff
+
+A reasonable schedule: 1s, 2s, 4s, 8s, 16s, then give up and log.
+
+### Idempotency
+
+`POST` endpoints accept an optional `Idempotency-Key` header. Re‑sending the same key within 24 hours returns the original response without creating a duplicate.
+
+```bash
+curl -X POST 'https://api.wundertreos.com/functions/v1/api-contacts' \
+  -H 'Authorization: Bearer YOUR_TOKEN' \
+  -H 'Idempotency-Key: 8c1f...-import-row-742' \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"jane@example.com"}'
+```
+
+### Pagination
+
+All list endpoints accept `limit` (max 200, default 50) and `offset`. To page through everything, increment `offset` by `limit` until the result array is empty.
