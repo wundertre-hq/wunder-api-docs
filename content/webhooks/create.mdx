@@ -64,4 +64,4 @@ The <code>secret</code> is only returned on creation. WundertreOS does not expos
 | Status | `error` | When |
 | --- | --- | --- |
 | 400 | `invalid_request` | `target_url` missing or not a URL; `event_types` empty; an event type is not in the supported set. |
-| 403 | `forbidden` | Credential lacks `webhooks:write`. |
+| 403 | `forbidden` | Credential lacks `webhooks:read` or `webhooks:write`. |
