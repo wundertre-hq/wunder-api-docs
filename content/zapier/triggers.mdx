@@ -1,9 +1,9 @@
 export const meta = {
   title: "Zapier triggers",
-  description: "Events in Wundertre that can kick off a Zap.",
+  description: "Events in WundertreOS that can kick off a Zap.",
 };
 
-Triggers fire your Zap whenever something happens in Wundertre. Each trigger maps to a [webhook event type](/webhooks/events) under the hood.
+Triggers fire your Zap whenever something happens in WundertreOS. Each trigger maps to a [webhook event type](/webhooks/events) under the hood.
 
 ## New Contact
 
@@ -37,7 +37,7 @@ Great for tag‑driven automations like "when tagged `vip`, alert the account te
 
 ## Contact Enriched
 
-Fires when Wundertre's enrichment service adds new data (company, job title, LinkedIn, technographics) to a contact.
+Fires when WundertreOS's enrichment service adds new data (company, job title, LinkedIn, technographics) to a contact.
 
 - **Event type**: `contact.enriched`
 - **Sample fields**: contact + `enriched_fields` (list of fields that gained values)

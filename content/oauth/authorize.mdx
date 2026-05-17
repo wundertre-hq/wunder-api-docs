@@ -5,12 +5,12 @@ export const meta = {
 
 <MethodBadge method="GET" path="/oauth-authorize" />
 
-Redirect the user's browser to this endpoint to begin the OAuth flow. Wundertre will display a consent screen, then redirect back to your `redirect_uri` with an authorization code.
+Redirect the user's browser to this endpoint to begin the OAuth flow. WundertreOS will display a consent screen, then redirect back to your `redirect_uri` with an authorization code.
 
 ## Query parameters
 
 <ParamTable rows={[
-  { name: "client_id", type: "string", required: true, description: "Your OAuth client ID (from the Wundertre developer dashboard)." },
+  { name: "client_id", type: "string", required: true, description: "Your OAuth client ID (from the WundertreOS developer dashboard)." },
   { name: "redirect_uri", type: "string", required: true, description: "Must exactly match a redirect URI registered with your client." },
   { name: "response_type", type: "string", required: true, description: "Must be `code`." },
   { name: "scope", type: "string", required: true, description: "Space-separated list of scopes (e.g. `contacts:read contacts:write`)." },

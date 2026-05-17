@@ -3,7 +3,7 @@ export const meta = {
   description: "Verify webhook authenticity using the X-Wunder-Signature header and HMAC-SHA256.",
 };
 
-Every webhook delivery includes an HMAC‑SHA256 signature so you can verify the payload came from Wundertre and wasn't tampered with in transit.
+Every webhook delivery includes an HMAC‑SHA256 signature so you can verify the payload came from WundertreOS and wasn't tampered with in transit.
 
 ## The signature header
 
@@ -53,4 +53,4 @@ Most frameworks parse JSON bodies before your handler runs. Capture the raw requ
 
 ## Rotating the signing secret
 
-You can rotate the signing secret from the dashboard. During a rotation window Wundertre signs deliveries with **both** the old and new secret — accept either for ~24 hours, then drop the old one.
+You can rotate the signing secret from the dashboard. During a rotation window WundertreOS signs deliveries with **both** the old and new secret — accept either for ~24 hours, then drop the old one.

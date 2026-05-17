@@ -19,7 +19,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
       <div className="flex items-center gap-2 px-5 py-5 border-b border-sidebar-border">
         <div className="h-7 w-7 rounded-md bg-gradient-to-br from-[var(--cyan)] to-[var(--magenta)]" />
         <div className="flex flex-col leading-tight">
-          <span className="text-sm font-semibold tracking-tight text-foreground">Wundertre OS</span>
+          <span className="text-sm font-semibold tracking-tight text-foreground">WundertreOS</span>
           <span className="text-[10px] uppercase tracking-wider text-muted-foreground">API Docs</span>
         </div>
       </div>

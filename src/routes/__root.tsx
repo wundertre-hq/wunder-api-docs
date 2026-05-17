@@ -53,8 +53,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Wundertre OS — Developer Documentation" },
-      { name: "description", content: "Official developer documentation for the Wundertre OS public API and Zapier integration." },
+      { title: "WundertreOS — Developer Documentation" },
+      { name: "description", content: "Official developer documentation for the WundertreOS public API and Zapier integration." },
     ],
     links: [{ rel: "stylesheet", href: appCss }],
   }),
@@ -90,7 +90,7 @@ function RootComponent() {
           <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-border bg-background/80 px-4 backdrop-blur lg:hidden">
             <div className="flex items-center gap-2">
               <div className="h-6 w-6 rounded-md bg-gradient-to-br from-[var(--cyan)] to-[var(--magenta)]" />
-              <span className="text-sm font-semibold">Wundertre OS</span>
+              <span className="text-sm font-semibold">WundertreOS</span>
             </div>
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetTrigger asChild>
