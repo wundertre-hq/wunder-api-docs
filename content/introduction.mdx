@@ -33,7 +33,7 @@ If you just want point‑and‑click automation, jump straight to the [Zapier In
 - Every resource is scoped to an **organization** (`org_id`). A credential is bound to exactly one org.
 - List endpoints support cursor‑style pagination via `limit` and `offset`.
 - Successful list responses wrap results in `{ "data": [...] }`. Single‑object responses use `{ "data": { ... } }`.
-- Errors return `{ "error": "<code>", "message": "..." }` with an appropriate HTTP status.
+- Errors return `{ "error": "invalid_request", "message": "..." }` with an appropriate HTTP status.
 
 <Callout type="tip" title="Get an API key in 60 seconds">
 Sign in to your WundertreOS workspace → **Settings → Developer → API keys** to generate a key.

@@ -14,10 +14,10 @@ Returns contacts in the caller's organization. Designed to support both general 
 
 <ParamTable rows={[
   { name: "updated_since", type: "string (ISO 8601)", description: "Return only contacts updated at or after this timestamp." },
-  { name: "event", type: "string", description: "Polling‑trigger filter. One of created, tag_added, enriched. When set to created, results are sorted by created_at and combined with updated_since as a created_at filter. When set to enriched, results are filtered to contacts with a non‑null enriched_at and sorted by enriched_at." },
+  { name: "event", type: "string", description: "Optional. Filter by event type for Zapier polling. Accepted values: created, updated, tag_added, enriched. When combined with updated_since, returns only contacts matching that specific change type. When set to created, results are sorted by created_at and combined with updated_since as a created_at filter. When set to enriched, results are filtered to contacts with a non‑null enriched_at and sorted by enriched_at." },
   { name: "limit", type: "integer", description: "Max contacts to return. Default 100, max 200." },
   { name: "offset", type: "integer", description: "Pagination offset. Default 0." },
-  { name: "order", type: "string", description: "asc or desc (default desc — newest first)." },
+  { name: "order", type: "string", description: "Optional. Sort direction. Accepted values: asc, desc. Defaults to desc (newest first, as expected by Zapier polling triggers)." },
 ]} title="Query" />
 
 ## Example request
@@ -110,5 +110,5 @@ const { data, meta } = await res.json();
   { name: "data[].created_by", type: "uuid", nullable: true, description: "User who created the contact." },
   { name: "meta.limit", type: "integer" },
   { name: "meta.offset", type: "integer" },
-  { name: "meta.count", type: "integer", description: "Number of rows returned in this page." },
+  { name: "meta.count", type: "integer", description: "Number of items returned in the current page. Note: count reflects the number of records in this page, not the total across all pages. Use offset to paginate through results." },
 ]} />
