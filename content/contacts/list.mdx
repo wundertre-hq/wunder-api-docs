@@ -1,0 +1,71 @@
+export const meta = {
+  title: "List contacts",
+  description: "Retrieve a paginated list of contacts in the workspace, optionally filtered by event or update time.",
+};
+
+<MethodBadge method="GET" path="/api-contacts" />
+
+## Query parameters
+
+<ParamTable rows={[
+  { name: "event", type: "string", description: "Filter to contacts touched by a specific event type (e.g. contact.created, contact.enriched). Useful for Zapier triggers." },
+  { name: "updated_since", type: "string (ISO 8601)", description: "Return only contacts updated at or after this timestamp." },
+  { name: "limit", type: "integer", description: "Max number of contacts to return. Default 50, max 200." },
+  { name: "offset", type: "integer", description: "Number of contacts to skip. Default 0." },
+  { name: "order", type: "string", description: "Sort order. One of updated_at.desc (default), updated_at.asc, created_at.desc, created_at.asc." },
+]} title="Query" />
+
+## Example request
+
+```bash
+curl -X GET \
+  'https://api.wundertreos.com/functions/v1/api-contacts?limit=50&updated_since=2026-01-01T00:00:00Z' \
+  -H 'Authorization: Bearer YOUR_ACCESS_TOKEN'
+```
+
+```js
+const res = await fetch(
+  "https://api.wundertreos.com/functions/v1/api-contacts?limit=50",
+  { headers: { Authorization: `Bearer ${token}` } }
+);
+const { data, pagination } = await res.json();
+```
+
+## Response
+
+```json
+{
+  "data": [
+    {
+      "id": "c8b1f3a0-4d2e-4f9a-9b1c-2d4e5f6a7b8c",
+      "email": "jane@example.com",
+      "first_name": "Jane",
+      "last_name": "Doe",
+      "phone": "+15551234567",
+      "company": "Acme Inc",
+      "tags": ["lead", "vip"],
+      "lifecycle_stage": "customer",
+      "owner_id": "u_1234",
+      "created_at": "2026-04-12T09:31:22Z",
+      "updated_at": "2026-05-17T11:02:08Z"
+    }
+  ],
+  "pagination": { "limit": 50, "offset": 0, "total": 1 }
+}
+```
+
+<SchemaTable rows={[
+  { name: "data", type: "Contact[]", description: "Array of contact objects." },
+  { name: "data[].id", type: "uuid", description: "Unique contact ID." },
+  { name: "data[].email", type: "string", nullable: true, description: "Primary email address." },
+  { name: "data[].first_name", type: "string", nullable: true, description: "Given name." },
+  { name: "data[].last_name", type: "string", nullable: true, description: "Family name." },
+  { name: "data[].phone", type: "string", nullable: true, description: "E.164 phone number." },
+  { name: "data[].company", type: "string", nullable: true, description: "Company name." },
+  { name: "data[].tags", type: "string[]", description: "Tags applied to this contact." },
+  { name: "data[].lifecycle_stage", type: "string", nullable: true, description: "lead, mql, sql, customer, evangelist, or null." },
+  { name: "data[].owner_id", type: "string", nullable: true, description: "ID of the Wundertre user who owns this contact." },
+  { name: "data[].created_at", type: "string (ISO 8601)", description: "When the contact was created." },
+  { name: "data[].updated_at", type: "string (ISO 8601)", description: "Last modification time." },
+  { name: "pagination", type: "object", description: "{ limit, offset, total }" },
+]} />

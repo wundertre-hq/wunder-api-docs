@@ -1,0 +1,48 @@
+export const meta = {
+  title: "Update contact",
+  description: "Update one or more fields on an existing contact.",
+};
+
+<MethodBadge method="PATCH" path="/api-contacts/:id" />
+
+Requires the `contacts:write` scope. Only fields included in the body are modified — omitted fields are left unchanged.
+
+## Path parameters
+
+<ParamTable rows={[
+  { name: "id", type: "uuid", required: true, description: "The contact ID." },
+]} title="Path" />
+
+## Updatable fields
+
+<ParamTable rows={[
+  { name: "email", type: "string", description: "Primary email." },
+  { name: "phone", type: "string", description: "E.164 phone number." },
+  { name: "first_name", type: "string", description: "Given name." },
+  { name: "last_name", type: "string", description: "Family name." },
+  { name: "company", type: "string", description: "Company name." },
+  { name: "title", type: "string", description: "Job title." },
+  { name: "tags", type: "string[]", description: "Replaces the full tag list. Use add_tags / remove_tags to mutate instead." },
+  { name: "add_tags", type: "string[]", description: "Tags to append without replacing existing." },
+  { name: "remove_tags", type: "string[]", description: "Tags to remove." },
+  { name: "lifecycle_stage", type: "string", description: "lead, mql, sql, customer, evangelist." },
+  { name: "owner_id", type: "string", description: "Reassign owner." },
+  { name: "custom_fields", type: "object", description: "Merge into existing custom fields. Set a value to null to clear it." },
+]} title="Body" />
+
+## Example request
+
+```bash
+curl -X PATCH \
+  'https://api.wundertreos.com/functions/v1/api-contacts/c8b1f3a0-4d2e-4f9a-9b1c-2d4e5f6a7b8c' \
+  -H 'Authorization: Bearer YOUR_ACCESS_TOKEN' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "lifecycle_stage": "customer",
+    "add_tags": ["vip"]
+  }'
+```
+
+## Response
+
+Returns `200 OK` with the updated contact (same shape as [Get contact](/contacts/get)).
