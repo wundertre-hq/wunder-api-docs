@@ -5,6 +5,14 @@ export const meta = {
 
 <MethodBadge method="POST" path="/api-contacts" />
 
+<TryIt method="POST" path="/api-contacts" body={`{
+  "first_name": "Jane",
+  "last_name": "Doe",
+  "email": "jane@example.com",
+  "tags": ["lead"]
+}`} />
+
+
 Requires the `contacts:write` scope. Returns `201 Created` with the new contact.
 
 ## Request body

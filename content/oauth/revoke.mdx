@@ -5,6 +5,11 @@ export const meta = {
 
 <MethodBadge method="POST" path="/oauth-revoke" />
 
+<TryIt method="POST" path="/oauth-revoke" body={`{
+  "token": "ACCESS_OR_REFRESH_TOKEN"
+}`} />
+
+
 Use this when a user disconnects your integration. Implements [RFC 7009](https://datatracker.ietf.org/doc/html/rfc7009) — the endpoint always returns `200` with an empty JSON body, even for unknown tokens, to avoid leaking information.
 
 Accepts either `application/x-www-form-urlencoded` or `application/json`.

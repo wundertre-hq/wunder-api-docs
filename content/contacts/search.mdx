@@ -5,6 +5,11 @@ export const meta = {
 
 <MethodBadge method="POST" path="/api-contacts-search" />
 
+<TryIt method="POST" path="/api-contacts-search" body={`{
+  "email": "jane@example.com"
+}`} />
+
+
 Requires the `contacts:read` scope. Powers the Zapier "Find Contact" action.
 
 At least one of `email`, `phone`, `first_name`, `last_name`, or `tags` must be provided.
