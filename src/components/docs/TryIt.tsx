@@ -19,7 +19,7 @@ type TryItProps = {
 };
 
 const DEFAULT_BASE = "https://api.wundertreos.com/functions/v1";
-const AUTH_KEY = "wundertreos.docs.authHeader";
+const AUTH_KEY = "wundertreos.docs.apiKey";
 
 const methodColors: Record<string, string> = {
   GET: "bg-[oklch(0.77_0.14_215_/_0.15)] text-[oklch(0.85_0.14_215)] border-[oklch(0.77_0.14_215_/_0.3)]",
@@ -97,7 +97,7 @@ export function TryIt({ method, path, baseUrl = DEFAULT_BASE, query, headers, bo
       for (const h of headerKV) {
         if (h.enabled && h.key) hdrs[h.key] = h.value;
       }
-      if (auth.trim()) hdrs["Authorization"] = auth.trim();
+      if (auth.trim()) hdrs["X-API-Key"] = auth.trim();
       try {
         localStorage.setItem(AUTH_KEY, auth);
       } catch {
@@ -188,14 +188,26 @@ export function TryIt({ method, path, baseUrl = DEFAULT_BASE, query, headers, bo
       {/* Auth */}
       <div className="border-b border-border p-3">
         <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
-          Authorization header (stored locally in your browser only)
+          API Key (stored locally in your browser only)
         </label>
         <Input
           value={auth}
           onChange={(e) => setAuth(e.target.value)}
-          placeholder="Bearer YOUR_ACCESS_TOKEN  or  X-API-Key: YOUR_API_KEY"
+          placeholder="wt_your_api_key_here"
           className="h-9 font-mono text-xs"
         />
+        <p className="mt-1.5 text-xs text-muted-foreground">
+          Create an API key in your workspace under{" "}
+          <a
+            href="https://os.wundertre.com/settings/integrations"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary underline-offset-2 hover:underline"
+          >
+            Settings → Integrations & API
+          </a>
+          .
+        </p>
       </div>
 
       {/* Tabs */}
