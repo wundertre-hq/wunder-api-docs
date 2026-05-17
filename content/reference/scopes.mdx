@@ -8,8 +8,8 @@ When you start the OAuth flow at [`/oauth-authorize`](/oauth/authorize), pass a 
 <SchemaTable title="Available scopes" rows={[
   { name: "contacts:read", type: "scope", description: "Read contacts, deals, activities, and search. Required by GET /api-deals, GET /api-activities, and POST /api-contacts-search. GET /api-contacts and its sub-resources (/:id, /:id/deals, /:id/activities) only require a valid credential — no explicit scope check." },
   { name: "contacts:write", type: "scope", description: "Create, update, and delete contacts. Required by POST /api-contacts, PATCH /api-contacts/:id, and DELETE /api-contacts/:id." },
-  { name: "webhooks:read", type: "scope", description: "List webhook subscriptions and retrieve a single subscription. Required by GET /api-webhook-subscriptions and GET /api-webhook-subscriptions/:id." },
-  { name: "webhooks:write", type: "scope", description: "Create and delete webhook subscriptions. Required by POST /api-webhook-subscriptions and DELETE /api-webhook-subscriptions/:id." },
+  { name: "webhooks:read", type: "scope", description: "Required by every /api-webhook-subscriptions request — including POST and DELETE, which additionally require webhooks:write. Covers GET /api-webhook-subscriptions and GET /api-webhook-subscriptions/:id on its own." },
+  { name: "webhooks:write", type: "scope", description: "Required in addition to webhooks:read for POST /api-webhook-subscriptions and DELETE /api-webhook-subscriptions/:id. webhooks:write alone is not sufficient — the endpoint checks webhooks:read first." },
 ]} />
 
 ## Example
