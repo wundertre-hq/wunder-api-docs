@@ -5,6 +5,7 @@ import { Search, ChevronDown } from "lucide-react";
 import { nav, flatNav } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 import logo from "@/assets/wundertre-os-logo-white.png";
+import { StatusBadge } from "@/components/layout/StatusBadge";
 
 export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -85,6 +86,9 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
           </div>
         )}
       </nav>
+      <div className="border-t border-sidebar-border px-3 py-3">
+        <StatusBadge />
+      </div>
     </aside>
   );
 }
