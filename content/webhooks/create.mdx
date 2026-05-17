@@ -1,0 +1,52 @@
+export const meta = {
+  title: "Create webhook subscription",
+  description: "Subscribe a target URL to one or more Wundertre event types.",
+};
+
+<MethodBadge method="POST" path="/api-webhook-subscriptions" />
+
+Requires the `webhooks:write` scope.
+
+## Request body
+
+<ParamTable rows={[
+  { name: "target_url", type: "string (https URL)", required: true, description: "HTTPS endpoint that will receive POST deliveries." },
+  { name: "event_types", type: "string[]", required: true, description: "Array of event types to subscribe to. See Event types reference." },
+  { name: "description", type: "string", description: "Optional human-readable label shown in the dashboard." },
+]} title="Body" />
+
+## Example request
+
+```bash
+curl -X POST \
+  'https://api.wundertreos.com/functions/v1/api-webhook-subscriptions' \
+  -H 'Authorization: Bearer YOUR_ACCESS_TOKEN' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "target_url": "https://example.com/wundertre/webhook",
+    "event_types": ["contact.created", "contact.tag_added"],
+    "description": "Sync new leads to internal CRM"
+  }'
+```
+
+## Response
+
+Returns `201 Created` with the subscription, including a `signing_secret` you'll need for [signature verification](/webhooks/signature):
+
+```json
+{
+  "data": {
+    "id": "wh_a1b2c3",
+    "target_url": "https://example.com/wundertre/webhook",
+    "event_types": ["contact.created", "contact.tag_added"],
+    "description": "Sync new leads to internal CRM",
+    "signing_secret": "whsec_8f3c2a1d9e7b4f6a",
+    "active": true,
+    "created_at": "2026-05-17T14:30:00Z"
+  }
+}
+```
+
+<Callout type="warn">
+The <code>signing_secret</code> is shown only on creation. Store it securely — you cannot retrieve it later.
+</Callout>
