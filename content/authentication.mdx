@@ -28,6 +28,10 @@ When a user connects your Zap to WundertreOS, Zapier handles the OAuth dance for
 
 ### b. Direct OAuth flow
 
+<Callout type="info">
+This section is for developers building applications that connect to WundertreOS on behalf of their users. If you just want to call the API directly or test endpoints, skip to [API keys](#2-api-keys) — that's the right method for you.
+</Callout>
+
 If you're building your own integration, run a standard OAuth 2.0 authorization‑code flow (PKCE S256 supported and recommended for public clients):
 
 1. Redirect the user to `GET /oauth-authorize` ([reference](/oauth/authorize))
