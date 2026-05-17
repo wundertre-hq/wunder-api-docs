@@ -6,7 +6,7 @@ import { findNav, nav } from "@/lib/nav";
 
 // Eagerly import all MDX so we can render by slug.
 const modules = import.meta.glob<{ default: ComponentType; meta?: { title: string; description?: string } }>(
-  "../../content/**/*.mdx",
+  "/content/**/*.mdx",
   { eager: true },
 );
 
