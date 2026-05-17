@@ -8,14 +8,34 @@ Every webhook delivery is an HTTP `POST` to your `target_url` with a JSON body s
 ```json
 {
   "id": "ev1a2b3c-4d5e-6f7a-8b9c-0d1e2f3a4b5c",
-  "event_type": "contact.created",
+  "event_type": "contact.tag_added",
   "org_id": "a1b2c3d4-1111-2222-3333-444455556666",
-  "data": { /* event-specific payload */ },
-  "delivered_at": "2026-05-17T14:30:00Z"
+  "data": {
+    "id": "c8b1f3a0-4d2e-4f9a-9b1c-2d4e5f6a7b8c",
+    "org_id": "a1b2c3d4-1111-2222-3333-444455556666",
+    "event_type": "contact.tag_added",
+    "contact": { /* full ls_contacts row */ },
+    "occurred_at": "2026-05-17T14:30:00.000Z"
+  },
+  "delivered_at": "2026-05-17T14:30:01.000Z"
 }
 ```
 
-The `data` field's shape depends on `event_type`. WundertreOS emits exactly these event types:
+The top-level `id` is the **delivery/event id** (from the `webhook_events` row). `data.id` is the **resource id** — the contact, deal, or activity the event is about. They are different UUIDs.
+
+Inside `data`, the resource is nested under a key matching its kind:
+
+| Event type | Nested key | Shape |
+| --- | --- | --- |
+| `contact.*` | `data.contact` | Full `ls_contacts` row (every DB column, not the trimmed REST field set returned by `/api-contacts`) |
+| `deal.*` | `data.deal` | Full deal row |
+| `contact.note_added` | `data.activity` | Full activity row (the note) |
+
+<Callout type="info" title="Companion contact.updated deliveries">
+For `contact.tag_added` and `contact.enriched`, the system also enqueues a separate `contact.updated` delivery for the same contact. Your endpoint will receive both — dedupe on `X-Wunder-Delivery` if you only want to process one.
+</Callout>
+
+WundertreOS emits exactly these event types:
 
 ## Contact events
 
@@ -43,13 +63,22 @@ The `data` field's shape depends on `event_type`. WundertreOS emits exactly thes
   "org_id": "a1b2c3d4-1111-2222-3333-444455556666",
   "data": {
     "id": "c8b1f3a0-4d2e-4f9a-9b1c-2d4e5f6a7b8c",
-    "first_name": "Jane",
-    "last_name": "Doe",
-    "email": "jane@example.com",
-    "tags": ["lead", "vip"],
-    "added_tags": ["vip"]
+    "org_id": "a1b2c3d4-1111-2222-3333-444455556666",
+    "event_type": "contact.tag_added",
+    "contact": {
+      "id": "c8b1f3a0-4d2e-4f9a-9b1c-2d4e5f6a7b8c",
+      "org_id": "a1b2c3d4-1111-2222-3333-444455556666",
+      "first_name": "Jane",
+      "last_name": "Doe",
+      "email": "jane@example.com",
+      "tags": ["lead", "vip"],
+      "status": "active",
+      "created_at": "2026-05-10T09:12:00Z",
+      "updated_at": "2026-05-17T14:30:00Z"
+    },
+    "occurred_at": "2026-05-17T14:30:00.000Z"
   },
-  "delivered_at": "2026-05-17T14:30:00Z"
+  "delivered_at": "2026-05-17T14:30:01.000Z"
 }
 ```
 

@@ -8,7 +8,7 @@ export const meta = {
 <TryIt method="DELETE" path="/api-webhook-subscriptions/:id" />
 
 
-Requires the `webhooks:write` scope. Implements the Zapier REST Hooks unsubscribe contract.
+Requires both `webhooks:read` and `webhooks:write` scopes (every `/api-webhook-subscriptions` request checks `webhooks:read` first, then DELETE additionally checks `webhooks:write`). Implements the Zapier REST Hooks unsubscribe contract.
 
 ## Path parameters
 
