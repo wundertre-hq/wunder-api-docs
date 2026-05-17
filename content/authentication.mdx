@@ -3,11 +3,11 @@ export const meta = {
   description: "Authenticate API requests using OAuth 2.0 Bearer tokens or scoped API keys.",
 };
 
-The Wundertre OS API supports **two authentication methods**. Use whichever fits your integration model.
+The WundertreOS API supports **two authentication methods**. Use whichever fits your integration model.
 
 | Method | Best for | Header |
 | --- | --- | --- |
-| **OAuth 2.0 Bearer token** | Third‑party apps acting on behalf of a Wundertre user (Zapier, Make, your own SaaS) | `Authorization: Bearer <token>` |
+| **OAuth 2.0 Bearer token** | Third‑party apps acting on behalf of a WundertreOS user (Zapier, Make, your own SaaS) | `Authorization: Bearer <token>` |
 | **API key** | First‑party integrations, server‑to‑server scripts, internal automation | `X-API-Key: wt_...` |
 
 ## 1. OAuth 2.0 Bearer tokens
@@ -26,7 +26,7 @@ If you're building your own integration, run a standard OAuth 2.0 authorization�
 
 1. Redirect the user to `GET /oauth-authorize` ([reference](/oauth/authorize))
 2. The user approves the requested scopes
-3. Wundertre redirects back to your `redirect_uri` with a `code`
+3. WundertreOS redirects back to your `redirect_uri` with a `code`
 4. Exchange the code for tokens at `POST /oauth-token` ([reference](/oauth/token))
 
 You'll receive an `access_token` (valid 1 hour) and a `refresh_token`. Use the refresh token to mint new access tokens without prompting the user again.
@@ -41,7 +41,7 @@ curl -X GET \
 
 ## 2. API keys
 
-API keys are long‑lived, workspace‑scoped credentials issued from the Wundertre dashboard. They start with the prefix `wt_` followed by a random suffix:
+API keys are long‑lived, workspace‑scoped credentials issued from the WundertreOS dashboard. They start with the prefix `wt_` followed by a random suffix:
 
 ```text
 wt_live_1a2b3c4d5e6f7g8h9i0j

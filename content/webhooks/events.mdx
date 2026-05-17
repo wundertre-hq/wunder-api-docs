@@ -1,6 +1,6 @@
 export const meta = {
   title: "Event types",
-  description: "Reference for every webhook event Wundertre OS can emit.",
+  description: "Reference for every webhook event WundertreOS can emit.",
 };
 
 Every webhook delivery is a POST request with a JSON body shaped like:
@@ -23,7 +23,7 @@ The `data` field's shape depends on `type`. The following events are supported:
   { name: "contact.created", type: "event", description: "Fires when any new contact is created — manually, via import, or via API." },
   { name: "contact.updated", type: "event", description: "Fires when any field on a contact changes. Payload includes the new state and a `changes` diff." },
   { name: "contact.tag_added", type: "event", description: "Fires when one or more tags are added to a contact. Useful for tag‑triggered automations." },
-  { name: "contact.enriched", type: "event", description: "Fires when Wundertre's enrichment service adds new data (company, LinkedIn, technographics) to a contact." },
+  { name: "contact.enriched", type: "event", description: "Fires when WundertreOS's enrichment service adds new data (company, LinkedIn, technographics) to a contact." },
   { name: "contact.note_added", type: "event", description: "Fires when a note is added to a contact's timeline." },
   { name: "contact.deal_added", type: "event", description: "Fires when a deal is linked to a contact." },
 ]} />

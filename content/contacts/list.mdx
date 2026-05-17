@@ -64,7 +64,7 @@ const { data, pagination } = await res.json();
   { name: "data[].company", type: "string", nullable: true, description: "Company name." },
   { name: "data[].tags", type: "string[]", description: "Tags applied to this contact." },
   { name: "data[].lifecycle_stage", type: "string", nullable: true, description: "lead, mql, sql, customer, evangelist, or null." },
-  { name: "data[].owner_id", type: "string", nullable: true, description: "ID of the Wundertre user who owns this contact." },
+  { name: "data[].owner_id", type: "string", nullable: true, description: "ID of the WundertreOS user who owns this contact." },
   { name: "data[].created_at", type: "string (ISO 8601)", description: "When the contact was created." },
   { name: "data[].updated_at", type: "string (ISO 8601)", description: "Last modification time." },
   { name: "pagination", type: "object", description: "{ limit, offset, total }" },

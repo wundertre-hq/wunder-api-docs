@@ -1,13 +1,13 @@
 export const meta = {
   title: "How to connect Zapier",
-  description: "Step-by-step walkthrough for connecting your Wundertre workspace to Zapier.",
+  description: "Step-by-step walkthrough for connecting your WundertreOS workspace to Zapier.",
 };
 
 This takes about two minutes.
 
 ## 1. Open Zapier
 
-Sign in to [zapier.com](https://zapier.com) and click **Create Zap** (or open any existing Zap you want to add a Wundertre step to).
+Sign in to [zapier.com](https://zapier.com) and click **Create Zap** (or open any existing Zap you want to add a WundertreOS step to).
 
 ## 2. Search for WundertreOS
 
@@ -19,7 +19,7 @@ When you pick any WundertreOS trigger or action, Zapier prompts you to **Connect
 
 ## 4. Approve the OAuth consent screen
 
-A Wundertre window pops up. If you're not signed in, sign in to your Wundertre workspace.
+A WundertreOS window pops up. If you're not signed in, sign in to your WundertreOS workspace.
 
 You'll see a consent screen listing the permissions Zapier is requesting:
 
@@ -36,7 +36,7 @@ Zapier confirms the connection with a green checkmark — usually showing the us
 You can now pick a trigger or action and continue building your Zap.
 
 <Callout type="tip">
-You can connect <strong>multiple</strong> Wundertre accounts to Zapier (e.g. one per workspace). Each Zap step lets you pick which connected account to use.
+You can connect <strong>multiple</strong> WundertreOS accounts to Zapier (e.g. one per workspace). Each Zap step lets you pick which connected account to use.
 </Callout>
 
 ## Disconnecting
@@ -44,6 +44,6 @@ You can connect <strong>multiple</strong> Wundertre accounts to Zapier (e.g. one
 To revoke Zapier's access:
 
 - In Zapier: **My Apps → WundertreOS → Disconnect**, or
-- In Wundertre: **Settings → Connected apps → Zapier → Revoke**
+- In WundertreOS: **Settings → Connected apps → Zapier → Revoke**
 
 Either action calls [`POST /oauth-revoke`](/oauth/revoke) and immediately invalidates the tokens.
