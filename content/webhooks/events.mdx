@@ -3,60 +3,64 @@ export const meta = {
   description: "Reference for every webhook event WundertreOS can emit.",
 };
 
-Every webhook delivery is a POST request with a JSON body shaped like:
+Every webhook delivery is an HTTP `POST` to your `target_url` with a JSON body shaped like:
 
 ```json
 {
-  "id": "evt_01HXYZ...",
-  "type": "contact.created",
-  "created_at": "2026-05-17T14:30:00Z",
-  "workspace_id": "ws_...",
-  "data": { /* event-specific payload */ }
+  "id": "ev1a2b3c-4d5e-6f7a-8b9c-0d1e2f3a4b5c",
+  "event_type": "contact.created",
+  "org_id": "a1b2c3d4-1111-2222-3333-444455556666",
+  "data": { /* event-specific payload */ },
+  "delivered_at": "2026-05-17T14:30:00Z"
 }
 ```
 
-The `data` field's shape depends on `type`. The following events are supported:
+The `data` field's shape depends on `event_type`. WundertreOS emits exactly these event types:
 
 ## Contact events
 
 <SchemaTable title="Event types" rows={[
-  { name: "contact.created", type: "event", description: "Fires when any new contact is created — manually, via import, or via API." },
-  { name: "contact.updated", type: "event", description: "Fires when any field on a contact changes. Payload includes the new state and a `changes` diff." },
-  { name: "contact.tag_added", type: "event", description: "Fires when one or more tags are added to a contact. Useful for tag‑triggered automations." },
+  { name: "contact.created", type: "event", description: "Fires when a new contact is created — manually, via import, or via API." },
+  { name: "contact.updated", type: "event", description: "Fires when any field on a contact changes." },
+  { name: "contact.tag_added", type: "event", description: "Fires when one or more tags are added to a contact." },
   { name: "contact.enriched", type: "event", description: "Fires when WundertreOS's enrichment service adds new data (company, LinkedIn, technographics) to a contact." },
-  { name: "contact.note_added", type: "event", description: "Fires when a note is added to a contact's timeline." },
-  { name: "contact.deal_added", type: "event", description: "Fires when a deal is linked to a contact." },
+  { name: "contact.note_added", type: "event", description: "Fires when a note activity is added to a contact's timeline." },
 ]} />
 
 ## Deal events
 
 <SchemaTable title="Event types" rows={[
   { name: "deal.created", type: "event", description: "Fires when a new deal is created." },
-  { name: "deal.updated", type: "event", description: "Fires on any deal field change, including stage transitions." },
+  { name: "deal.updated", type: "event", description: "Fires on any deal field change, including stage transitions and won/lost." },
 ]} />
 
 ## Example payload: `contact.tag_added`
 
 ```json
 {
-  "id": "evt_01HXYZ123",
-  "type": "contact.tag_added",
-  "created_at": "2026-05-17T14:30:00Z",
-  "workspace_id": "ws_abc",
+  "id": "ev1a2b3c-4d5e-6f7a-8b9c-0d1e2f3a4b5c",
+  "event_type": "contact.tag_added",
+  "org_id": "a1b2c3d4-1111-2222-3333-444455556666",
   "data": {
-    "contact": {
-      "id": "c8b1f3a0-...",
-      "email": "jane@example.com",
-      "tags": ["lead", "vip"]
-    },
+    "id": "c8b1f3a0-4d2e-4f9a-9b1c-2d4e5f6a7b8c",
+    "first_name": "Jane",
+    "last_name": "Doe",
+    "email": "jane@example.com",
+    "tags": ["lead", "vip"],
     "added_tags": ["vip"]
-  }
+  },
+  "delivered_at": "2026-05-17T14:30:00Z"
 }
 ```
 
-## Delivery guarantees
+## Delivery headers
 
-- **At‑least‑once** delivery
-- Retries up to 5 times with exponential backoff (15s, 1m, 5m, 30m, 2h) on non‑2xx responses
-- Deliveries time out after 10 seconds — keep your handler fast and queue heavy work
-- Use the event `id` to dedupe in case of retries
+Every delivery includes:
+
+| Header | Value |
+| --- | --- |
+| `Content-Type` | `application/json` |
+| `X-Wunder-Signature` | `sha256=<hex hmac>` — see [Verify signatures](/webhooks/signature) |
+| `X-Hook-Signature` | Same HMAC value, included for Zapier REST Hooks compatibility |
+| `X-Wunder-Event` | The `event_type` of this delivery |
+| `X-Wunder-Delivery` | The unique event `id` (use it to dedupe retries) |

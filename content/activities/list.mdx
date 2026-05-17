@@ -1,24 +1,27 @@
 export const meta = {
   title: "List activities",
-  description: "Retrieve activities across the workspace.",
+  description: "List contact activities across your entire organization.",
 };
 
 <MethodBadge method="GET" path="/api-activities" />
 
+Requires the `contacts:read` scope. Returns activities across all contacts in the organization, sorted by `created_at` descending. Useful for activity‑based Zapier triggers.
+
 ## Query parameters
 
 <ParamTable rows={[
-  { name: "created_since", type: "string (ISO 8601)", description: "Return only activities created at or after this time." },
-  { name: "type", type: "string", description: "Filter by activity type: note, email, call, meeting, tag_added, enrichment, deal_linked." },
-  { name: "contact_id", type: "uuid", description: "Filter to one contact." },
-  { name: "limit", type: "integer", description: "Default 50, max 200." },
+  { name: "created_since", type: "string (ISO 8601)", description: "Filter to activities with created_at >= value." },
+  { name: "type", type: "string", description: "Filter by activity_type (note, email, call, meeting, tag_added, enrichment, etc.)." },
+  { name: "contact_id", type: "uuid", description: "Filter to a single contact." },
+  { name: "limit", type: "integer", description: "Default 100, max 200." },
+  { name: "offset", type: "integer", description: "Default 0." },
 ]} title="Query" />
 
 ## Example request
 
 ```bash
 curl -X GET \
-  'https://api.wundertreos.com/functions/v1/api-activities?type=note&limit=100' \
+  'https://api.wundertreos.com/functions/v1/api-activities?type=note&created_since=2026-05-01T00:00:00Z' \
   -H 'Authorization: Bearer YOUR_ACCESS_TOKEN'
 ```
 
@@ -28,15 +31,17 @@ curl -X GET \
 {
   "data": [
     {
-      "id": "a_1a2b3c",
-      "type": "note",
+      "id": "ac1f3a0b-4d2e-4f9a-9b1c-2d4e5f6a7b8c",
+      "org_id": "a1b2c3d4-1111-2222-3333-444455556666",
       "contact_id": "c8b1f3a0-4d2e-4f9a-9b1c-2d4e5f6a7b8c",
-      "actor_id": "u_1234",
-      "body": "Great intro call",
+      "activity_type": "note",
+      "description": "Followed up via email; expecting a reply by Monday.",
       "metadata": {},
+      "performed_by": "u1b1f3a0-4d2e-4f9a-9b1c-2d4e5f6a7b8c",
       "created_at": "2026-05-17T13:45:00Z"
     }
-  ],
-  "pagination": { "limit": 50, "offset": 0, "total": 1 }
+  ]
 }
 ```
+
+Field schema is identical to [List activities for a contact](/contacts/activities).

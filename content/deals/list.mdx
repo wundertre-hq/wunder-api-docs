@@ -1,26 +1,28 @@
 export const meta = {
   title: "List deals",
-  description: "Retrieve deals across the workspace with optional filters.",
+  description: "List all deals in your organization with optional filtering.",
 };
 
 <MethodBadge method="GET" path="/api-deals" />
 
+Requires the `contacts:read` scope. Returns deals across all contacts in the caller's organization. Designed to support Zapier polling triggers for "New deal" and "Updated deal".
+
 ## Query parameters
 
 <ParamTable rows={[
-  { name: "created_since", type: "string (ISO 8601)", description: "Return deals created at or after this time." },
-  { name: "updated_since", type: "string (ISO 8601)", description: "Return deals updated at or after this time." },
-  { name: "contact_id", type: "uuid", description: "Filter to deals linked to a specific contact." },
-  { name: "stage", type: "string", description: "Filter by pipeline stage: new, qualified, proposal, negotiation, won, lost." },
-  { name: "limit", type: "integer", description: "Default 50, max 200." },
+  { name: "created_since", type: "string (ISO 8601)", description: "Filter to deals with created_at >= value." },
+  { name: "updated_since", type: "string (ISO 8601)", description: "Filter to deals with updated_at >= value." },
+  { name: "contact_id", type: "uuid", description: "Only deals linked to this contact." },
+  { name: "limit", type: "integer", description: "Default 100, max 200." },
   { name: "offset", type: "integer", description: "Default 0." },
+  { name: "order", type: "string", description: "asc or desc on created_at. Default desc (newest first)." },
 ]} title="Query" />
 
 ## Example request
 
 ```bash
 curl -X GET \
-  'https://api.wundertreos.com/functions/v1/api-deals?stage=negotiation&limit=20' \
+  'https://api.wundertreos.com/functions/v1/api-deals?created_since=2026-05-01T00:00:00Z&limit=50' \
   -H 'Authorization: Bearer YOUR_ACCESS_TOKEN'
 ```
 
@@ -30,33 +32,46 @@ curl -X GET \
 {
   "data": [
     {
-      "id": "d_9f8e7d6c",
+      "id": "d1e2f3a4-1111-2222-3333-444455556666",
+      "org_id": "a1b2c3d4-1111-2222-3333-444455556666",
+      "contact_id": "c8b1f3a0-4d2e-4f9a-9b1c-2d4e5f6a7b8c",
+      "company_id": null,
+      "pipeline_id": "p1a2b3c4-1111-2222-3333-444455556666",
+      "stage_id": "s1a2b3c4-1111-2222-3333-444455556666",
       "title": "Acme — Annual plan",
       "value": 12000,
       "currency": "USD",
-      "stage": "negotiation",
-      "contact_id": "c8b1f3a0-4d2e-4f9a-9b1c-2d4e5f6a7b8c",
-      "owner_id": "u_1234",
       "expected_close_date": "2026-06-30",
-      "probability": 0.7,
+      "assigned_to": "u1b1f3a0-4d2e-4f9a-9b1c-2d4e5f6a7b8c",
+      "notes": null,
+      "won_at": null,
+      "lost_at": null,
+      "lost_reason": null,
       "created_at": "2026-05-01T10:00:00Z",
-      "updated_at": "2026-05-17T12:00:00Z"
+      "updated_at": "2026-05-17T12:00:00Z",
+      "created_by": "u1b1f3a0-4d2e-4f9a-9b1c-2d4e5f6a7b8c"
     }
-  ],
-  "pagination": { "limit": 50, "offset": 0, "total": 1 }
+  ]
 }
 ```
 
 <SchemaTable rows={[
-  { name: "data[].id", type: "string", description: "Unique deal ID." },
-  { name: "data[].title", type: "string", description: "Human-readable name." },
-  { name: "data[].value", type: "number", description: "Monetary value in minor units of currency." },
-  { name: "data[].currency", type: "string (ISO 4217)", description: "USD, EUR, etc." },
-  { name: "data[].stage", type: "string", description: "Pipeline stage." },
-  { name: "data[].contact_id", type: "uuid", nullable: true, description: "Primary linked contact." },
-  { name: "data[].owner_id", type: "string", nullable: true, description: "WundertreOS user owning the deal." },
-  { name: "data[].expected_close_date", type: "string (YYYY-MM-DD)", nullable: true, description: "Forecast close date." },
-  { name: "data[].probability", type: "number", nullable: true, description: "Probability 0–1." },
-  { name: "data[].created_at", type: "string (ISO 8601)", description: "Creation time." },
-  { name: "data[].updated_at", type: "string (ISO 8601)", description: "Last update." },
+  { name: "data[].id", type: "uuid" },
+  { name: "data[].org_id", type: "uuid" },
+  { name: "data[].contact_id", type: "uuid", nullable: true, description: "Linked contact." },
+  { name: "data[].company_id", type: "uuid", nullable: true, description: "Linked company." },
+  { name: "data[].pipeline_id", type: "uuid", description: "Pipeline this deal lives in." },
+  { name: "data[].stage_id", type: "uuid", description: "Current stage within the pipeline." },
+  { name: "data[].title", type: "string" },
+  { name: "data[].value", type: "number", nullable: true, description: "Monetary value of the deal." },
+  { name: "data[].currency", type: "string", nullable: true, description: "ISO 4217 code (e.g. USD)." },
+  { name: "data[].expected_close_date", type: "string (ISO 8601 date)", nullable: true },
+  { name: "data[].assigned_to", type: "uuid", nullable: true, description: "Owner user ID." },
+  { name: "data[].notes", type: "string", nullable: true },
+  { name: "data[].won_at", type: "string (ISO 8601)", nullable: true },
+  { name: "data[].lost_at", type: "string (ISO 8601)", nullable: true },
+  { name: "data[].lost_reason", type: "string", nullable: true },
+  { name: "data[].created_at", type: "string (ISO 8601)" },
+  { name: "data[].updated_at", type: "string (ISO 8601)" },
+  { name: "data[].created_by", type: "uuid", nullable: true },
 ]} />

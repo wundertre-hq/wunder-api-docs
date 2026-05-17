@@ -1,56 +1,91 @@
 export const meta = {
-  title: "Signature verification",
-  description: "Verify webhook authenticity using the X-Wunder-Signature header and HMAC-SHA256.",
+  title: "Verify webhook signatures",
+  description: "How WundertreOS signs webhook deliveries and how to verify them.",
 };
 
-Every webhook delivery includes an HMAC‑SHA256 signature so you can verify the payload came from WundertreOS and wasn't tampered with in transit.
+Every webhook delivery is signed with **HMAC‑SHA256** using the subscription's `secret`. Verify the signature before trusting the payload.
 
-## The signature header
+## How signing works
 
-```text
-X-Wunder-Signature: sha256=8c0f7d2b9a1e5f3c4d6a8b0e2c4f6a8d1b3e5c7f9a1d3e5c7f9a1d3e5c7f9a1d
-```
-
-The value is the lowercase hex digest of:
+When dispatching a delivery, WundertreOS computes:
 
 ```text
-HMAC-SHA256(signing_secret, raw_request_body)
+signature = HMAC_SHA256(secret, raw_request_body)
 ```
 
-## Verification (Node.js)
+and sends the hex digest in two headers (the values are identical — both are provided for Zapier REST Hooks compatibility):
+
+```text
+X-Wunder-Signature: sha256=<64-char hex>
+X-Hook-Signature:   sha256=<64-char hex>
+```
+
+The signature covers the **exact raw bytes** of the JSON request body. Re‑serializing the body before verifying will fail — always verify against the raw bytes you received.
+
+## Node.js example
 
 ```js
-import crypto from "crypto";
+import crypto from "node:crypto";
+import express from "express";
 
-export function verifyWundertreSignature(req, signingSecret) {
-  const header = req.headers["x-wunder-signature"];
-  if (!header || !header.startsWith("sha256=")) return false;
-  const expected = crypto
-    .createHmac("sha256", signingSecret)
-    .update(req.rawBody) // make sure this is the *raw* body, not parsed JSON
-    .digest("hex");
-  const provided = header.slice("sha256=".length);
-  // Constant‑time compare
-  return crypto.timingSafeEqual(Buffer.from(expected, "hex"), Buffer.from(provided, "hex"));
-}
+const app = express();
+const SECRET = process.env.WUNDERTRE_WEBHOOK_SECRET;
+
+// Capture the raw body — required for signature verification.
+app.post(
+  "/wundertre/webhook",
+  express.raw({ type: "application/json" }),
+  (req, res) => {
+    const header = req.header("X-Wunder-Signature") ?? "";
+    const signature = header.replace(/^sha256=/, "");
+
+    const expected = crypto
+      .createHmac("sha256", SECRET)
+      .update(req.body)              // Buffer of the raw body
+      .digest("hex");
+
+    const ok =
+      signature.length === expected.length &&
+      crypto.timingSafeEqual(
+        Buffer.from(signature, "hex"),
+        Buffer.from(expected, "hex"),
+      );
+
+    if (!ok) return res.status(401).send("Invalid signature");
+
+    const event = JSON.parse(req.body.toString("utf8"));
+    console.log(event.event_type, event.data);
+    res.status(200).send("ok");
+  },
+);
 ```
 
-## Verification (Python)
+## Python example
 
 ```python
 import hmac, hashlib
 
-def verify_signature(raw_body: bytes, header: str, signing_secret: str) -> bool:
-    if not header or not header.startswith("sha256="):
-        return False
-    expected = hmac.new(signing_secret.encode(), raw_body, hashlib.sha256).hexdigest()
-    return hmac.compare_digest(expected, header.split("=", 1)[1])
+def verify(raw_body: bytes, header: str, secret: str) -> bool:
+    sig = (header or "").removeprefix("sha256=")
+    expected = hmac.new(secret.encode(), raw_body, hashlib.sha256).hexdigest()
+    return hmac.compare_digest(sig, expected)
 ```
 
-<Callout type="warn" title="Always verify against the RAW body">
-Most frameworks parse JSON bodies before your handler runs. Capture the raw request bytes (in Express use <code>express.raw()</code> for the webhook route) — re‑serializing the parsed JSON will produce a different signature.
+## Retries and idempotency
+
+Failed deliveries (non‑2xx response or a connection error) are retried with exponential backoff. The full schedule is **8 attempts**:
+
+| Attempt | Wait before retry |
+| --- | --- |
+| 1 | immediate |
+| 2 | 1 minute |
+| 3 | 5 minutes |
+| 4 | 15 minutes |
+| 5 | 1 hour |
+| 6 – 8 | 6 hours |
+
+After 8 failed attempts the event is marked `failed` and dropped.
+
+<Callout type="tip" title="Use X-Wunder-Delivery for dedupe">
+WundertreOS may retry a successful delivery if your endpoint times out before responding. Dedupe by the <code>X-Wunder-Delivery</code> header (which equals the event <code>id</code>) and return <code>200</code> as soon as you've persisted the event — process it asynchronously.
 </Callout>
-
-## Rotating the signing secret
-
-You can rotate the signing secret from the dashboard. During a rotation window WundertreOS signs deliveries with **both** the old and new secret — accept either for ~24 hours, then drop the old one.
