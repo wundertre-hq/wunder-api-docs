@@ -1,0 +1,33 @@
+export const meta = {
+  title: "Identity (me)",
+  description: "Return the workspace and user identity associated with the current access token.",
+};
+
+<MethodBadge method="GET" path="/oauth-me" />
+
+Zapier and similar platforms call this immediately after the OAuth dance to display the connected account in the UI ("Connected as Jane Doe @ Acme").
+
+## Example request
+
+```bash
+curl -X GET 'https://api.wundertreos.com/functions/v1/oauth-me' \
+  -H 'Authorization: Bearer YOUR_ACCESS_TOKEN'
+```
+
+## Response
+
+```json
+{
+  "user": {
+    "id": "u_1234",
+    "email": "jane@acme.com",
+    "name": "Jane Doe"
+  },
+  "workspace": {
+    "id": "ws_abc",
+    "name": "Acme Inc",
+    "slug": "acme"
+  },
+  "scopes": ["contacts:read", "contacts:write", "webhooks:write"]
+}
+```
