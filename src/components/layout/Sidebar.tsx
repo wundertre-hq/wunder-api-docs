@@ -4,6 +4,7 @@ import Fuse from "fuse.js";
 import { Search, ChevronDown } from "lucide-react";
 import { nav, flatNav } from "@/lib/nav";
 import { cn } from "@/lib/utils";
+import logo from "@/assets/wundertre-os-logo-white.png";
 
 export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
