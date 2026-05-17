@@ -1,0 +1,62 @@
+export const meta = {
+  title: "List deals",
+  description: "Retrieve deals across the workspace with optional filters.",
+};
+
+<MethodBadge method="GET" path="/api-deals" />
+
+## Query parameters
+
+<ParamTable rows={[
+  { name: "created_since", type: "string (ISO 8601)", description: "Return deals created at or after this time." },
+  { name: "updated_since", type: "string (ISO 8601)", description: "Return deals updated at or after this time." },
+  { name: "contact_id", type: "uuid", description: "Filter to deals linked to a specific contact." },
+  { name: "stage", type: "string", description: "Filter by pipeline stage: new, qualified, proposal, negotiation, won, lost." },
+  { name: "limit", type: "integer", description: "Default 50, max 200." },
+  { name: "offset", type: "integer", description: "Default 0." },
+]} title="Query" />
+
+## Example request
+
+```bash
+curl -X GET \
+  'https://api.wundertreos.com/functions/v1/api-deals?stage=negotiation&limit=20' \
+  -H 'Authorization: Bearer YOUR_ACCESS_TOKEN'
+```
+
+## Response
+
+```json
+{
+  "data": [
+    {
+      "id": "d_9f8e7d6c",
+      "title": "Acme — Annual plan",
+      "value": 12000,
+      "currency": "USD",
+      "stage": "negotiation",
+      "contact_id": "c8b1f3a0-4d2e-4f9a-9b1c-2d4e5f6a7b8c",
+      "owner_id": "u_1234",
+      "expected_close_date": "2026-06-30",
+      "probability": 0.7,
+      "created_at": "2026-05-01T10:00:00Z",
+      "updated_at": "2026-05-17T12:00:00Z"
+    }
+  ],
+  "pagination": { "limit": 50, "offset": 0, "total": 1 }
+}
+```
+
+<SchemaTable rows={[
+  { name: "data[].id", type: "string", description: "Unique deal ID." },
+  { name: "data[].title", type: "string", description: "Human-readable name." },
+  { name: "data[].value", type: "number", description: "Monetary value in minor units of currency." },
+  { name: "data[].currency", type: "string (ISO 4217)", description: "USD, EUR, etc." },
+  { name: "data[].stage", type: "string", description: "Pipeline stage." },
+  { name: "data[].contact_id", type: "uuid", nullable: true, description: "Primary linked contact." },
+  { name: "data[].owner_id", type: "string", nullable: true, description: "Wundertre user owning the deal." },
+  { name: "data[].expected_close_date", type: "string (YYYY-MM-DD)", nullable: true, description: "Forecast close date." },
+  { name: "data[].probability", type: "number", nullable: true, description: "Probability 0–1." },
+  { name: "data[].created_at", type: "string (ISO 8601)", description: "Creation time." },
+  { name: "data[].updated_at", type: "string (ISO 8601)", description: "Last update." },
+]} />

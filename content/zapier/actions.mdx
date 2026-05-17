@@ -1,0 +1,71 @@
+export const meta = {
+  title: "Zapier actions",
+  description: "Things your Zap can do in Wundertre.",
+};
+
+Actions let your Zap **write** to Wundertre. Each maps to a documented REST endpoint.
+
+## Create Contact
+
+Creates a new contact. Maps to [`POST /api-contacts`](/contacts/create).
+
+**Fields** (Zapier UI):
+- Email (required if no phone)
+- Phone (required if no email)
+- First name, Last name
+- Company, Title
+- Tags (comma‑separated)
+- Lifecycle stage (dropdown: lead, mql, sql, customer, evangelist)
+- Owner (dropdown of workspace users)
+- Custom fields (key/value pairs)
+
+Returns the new contact object so downstream steps can reference the new `id`.
+
+## Update Contact
+
+Updates fields on an existing contact. Maps to [`PATCH /api-contacts/:id`](/contacts/update).
+
+**Fields**:
+- Contact ID (required) — usually mapped from a previous step
+- Any of: email, phone, first/last name, company, title, lifecycle stage, owner
+- Add tags / Remove tags (mutate without replacing the full list)
+- Custom fields
+
+## Find Contact
+
+Looks up a contact without modifying anything. Maps to [`POST /api-contacts-search`](/contacts/search).
+
+**Search by** one or more of:
+- Email
+- Phone
+- Name (fuzzy)
+- Tags (must have all)
+
+**"Should this step create a new contact if none is found?"** is supported — when checked and no match is found, the action falls back to Create Contact.
+
+## Add Tag to Contact
+
+Appends one or more tags to an existing contact. Convenience wrapper around `PATCH /api-contacts/:id` with `add_tags`.
+
+**Fields**:
+- Contact ID (required)
+- Tags to add (comma‑separated)
+
+## Create Deal
+
+Creates a deal in the pipeline.
+
+**Fields**:
+- Title (required)
+- Value, Currency (defaults to workspace currency)
+- Stage (dropdown)
+- Linked contact (required — usually a contact ID from a previous step)
+- Owner
+- Expected close date
+- Probability (0–100)
+
+Returns the new deal object.
+
+<Callout type="info" title="Building a typical sales Zap">
+A common pattern: <strong>Stripe → New Customer</strong> → <strong>WundertreOS → Find Contact</strong> (by email, create if missing) → <strong>WundertreOS → Add Tag</strong> (<code>customer</code>) → <strong>WundertreOS → Create Deal</strong> (stage <code>won</code>, value from Stripe).
+</Callout>

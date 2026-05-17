@@ -1,0 +1,39 @@
+export const meta = {
+  title: "Authorize",
+  description: "Start the OAuth 2.0 authorization code flow.",
+};
+
+<MethodBadge method="GET" path="/oauth-authorize" />
+
+Redirect the user's browser to this endpoint to begin the OAuth flow. Wundertre will display a consent screen, then redirect back to your `redirect_uri` with an authorization code.
+
+## Query parameters
+
+<ParamTable rows={[
+  { name: "client_id", type: "string", required: true, description: "Your OAuth client ID (from the Wundertre developer dashboard)." },
+  { name: "redirect_uri", type: "string", required: true, description: "Must exactly match a redirect URI registered with your client." },
+  { name: "response_type", type: "string", required: true, description: "Must be `code`." },
+  { name: "scope", type: "string", required: true, description: "Space-separated list of scopes (e.g. `contacts:read contacts:write`)." },
+  { name: "state", type: "string", required: true, description: "Opaque value echoed back to your redirect URI. Use it to prevent CSRF." },
+  { name: "code_challenge", type: "string", description: "Optional PKCE challenge (recommended for public clients)." },
+  { name: "code_challenge_method", type: "string", description: "If using PKCE, must be `S256`." },
+]} title="Query" />
+
+## Example
+
+```text
+https://api.wundertreos.com/functions/v1/oauth-authorize
+  ?client_id=zapier
+  &redirect_uri=https%3A%2F%2Fzapier.com%2Fdashboard%2Fauth%2Foauth%2Freturn
+  &response_type=code
+  &scope=contacts:read%20contacts:write%20webhooks:write
+  &state=abc123
+```
+
+## Successful redirect
+
+```text
+https://your-app.com/callback?code=ac_8f3c2a1d&state=abc123
+```
+
+Exchange the `code` at [`POST /oauth-token`](/oauth/token).

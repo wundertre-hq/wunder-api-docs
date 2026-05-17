@@ -1,0 +1,48 @@
+export const meta = {
+  title: "Search contacts",
+  description: "Find contacts by email, name, phone number, or tags.",
+};
+
+<MethodBadge method="POST" path="/api-contacts-search" />
+
+Used by Zapier's **Find Contact** action and any custom lookup flow. Returns up to 25 best matches ranked by relevance.
+
+## Request body
+
+<ParamTable rows={[
+  { name: "email", type: "string", description: "Exact email match (case‑insensitive)." },
+  { name: "phone", type: "string", description: "E.164 phone match." },
+  { name: "name", type: "string", description: "Fuzzy match against first_name + last_name + company." },
+  { name: "tags", type: "string[]", description: "Return only contacts that have ALL of these tags." },
+  { name: "limit", type: "integer", description: "Default 10, max 25." },
+]} title="Body" />
+
+<Callout type="tip">
+Provide at least one of <code>email</code>, <code>phone</code>, <code>name</code>, or <code>tags</code>.
+</Callout>
+
+## Example request
+
+```bash
+curl -X POST \
+  'https://api.wundertreos.com/functions/v1/api-contacts-search' \
+  -H 'Authorization: Bearer YOUR_ACCESS_TOKEN' \
+  -H 'Content-Type: application/json' \
+  -d '{ "email": "jane@example.com" }'
+```
+
+## Response
+
+```json
+{
+  "data": [
+    {
+      "id": "c8b1f3a0-4d2e-4f9a-9b1c-2d4e5f6a7b8c",
+      "email": "jane@example.com",
+      "first_name": "Jane",
+      "last_name": "Doe",
+      "match_score": 1.0
+    }
+  ]
+}
+```

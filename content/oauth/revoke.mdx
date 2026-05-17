@@ -1,0 +1,33 @@
+export const meta = {
+  title: "Revoke",
+  description: "Revoke an access or refresh token.",
+};
+
+<MethodBadge method="POST" path="/oauth-revoke" />
+
+Use this when a user disconnects your integration. Revoking a refresh token invalidates every access token issued from it.
+
+## Request body
+
+`application/x-www-form-urlencoded`:
+
+<ParamTable rows={[
+  { name: "token", type: "string", required: true, description: "The access_token or refresh_token to revoke." },
+  { name: "token_type_hint", type: "string", description: "`access_token` or `refresh_token` (optional hint for faster lookup)." },
+  { name: "client_id", type: "string", required: true, description: "Your OAuth client ID." },
+  { name: "client_secret", type: "string", description: "Required for confidential clients." },
+]} title="Body" />
+
+## Example
+
+```bash
+curl -X POST 'https://api.wundertreos.com/functions/v1/oauth-revoke' \
+  -H 'Content-Type: application/x-www-form-urlencoded' \
+  -d 'token=rt_1d3e5c7f9a1d3e5c' \
+  -d 'token_type_hint=refresh_token' \
+  -d 'client_id=your_client'
+```
+
+## Response
+
+Returns `200 OK` with an empty body on success. The endpoint also returns `200` for invalid tokens (per RFC 7009) to avoid leaking information.

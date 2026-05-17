@@ -1,0 +1,79 @@
+export const meta = {
+  title: "Authentication",
+  description: "Authenticate API requests using OAuth 2.0 Bearer tokens or scoped API keys.",
+};
+
+The Wundertre OS API supports **two authentication methods**. Use whichever fits your integration model.
+
+| Method | Best for | Header |
+| --- | --- | --- |
+| **OAuth 2.0 Bearer token** | Third‑party apps acting on behalf of a Wundertre user (Zapier, Make, your own SaaS) | `Authorization: Bearer <token>` |
+| **API key** | First‑party integrations, server‑to‑server scripts, internal automation | `X-API-Key: wt_...` |
+
+## 1. OAuth 2.0 Bearer tokens
+
+This is the same flow used by the official Zapier app. Tokens are scoped to a single workspace and a set of [scopes](/reference/scopes).
+
+There are two ways to obtain a Bearer token:
+
+### a. Connect through Zapier (no code)
+
+When a user connects your Zap to WundertreOS, Zapier handles the OAuth dance for you. The Zap receives a fresh access token automatically — see the [Zapier connect guide](/zapier/connect).
+
+### b. Direct OAuth flow
+
+If you're building your own integration, run a standard OAuth 2.0 authorization‑code flow:
+
+1. Redirect the user to `GET /oauth-authorize` ([reference](/oauth/authorize))
+2. The user approves the requested scopes
+3. Wundertre redirects back to your `redirect_uri` with a `code`
+4. Exchange the code for tokens at `POST /oauth-token` ([reference](/oauth/token))
+
+You'll receive an `access_token` (valid 1 hour) and a `refresh_token`. Use the refresh token to mint new access tokens without prompting the user again.
+
+### Example request
+
+```bash
+curl -X GET \
+  'https://api.wundertreos.com/functions/v1/api-contacts?limit=10' \
+  -H 'Authorization: Bearer YOUR_ACCESS_TOKEN'
+```
+
+## 2. API keys
+
+API keys are long‑lived, workspace‑scoped credentials issued from the Wundertre dashboard. They start with the prefix `wt_` followed by a random suffix:
+
+```text
+wt_live_1a2b3c4d5e6f7g8h9i0j
+```
+
+Pass the key in the `X-API-Key` header:
+
+```bash
+curl -X GET \
+  'https://api.wundertreos.com/functions/v1/api-contacts?limit=10' \
+  -H 'X-API-Key: wt_live_1a2b3c4d5e6f7g8h9i0j'
+```
+
+<Callout type="warn" title="Treat API keys like passwords">
+Never commit keys to source control or ship them in client‑side code. Use server‑side env vars and rotate keys from the dashboard if you suspect exposure.
+</Callout>
+
+## Choosing a method
+
+- **Distributing to many users?** Use OAuth.
+- **One workspace, one integration, one server?** Use an API key.
+- **Both work simultaneously** — pick per integration.
+
+## Errors
+
+If authentication fails you'll receive:
+
+```json
+{
+  "error": "unauthorized",
+  "message": "Invalid or expired credentials"
+}
+```
+
+with HTTP status `401`.

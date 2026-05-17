@@ -1,0 +1,54 @@
+export const meta = {
+  title: "Token",
+  description: "Exchange an authorization code for tokens, or refresh an expired access token.",
+};
+
+<MethodBadge method="POST" path="/oauth-token" />
+
+Used in two situations:
+1. **Exchange** an authorization `code` for an `access_token` + `refresh_token`
+2. **Refresh** an expired access token using a `refresh_token`
+
+Send as `application/x-www-form-urlencoded`.
+
+## Exchange authorization code
+
+<ParamTable rows={[
+  { name: "grant_type", type: "string", required: true, description: "Must be `authorization_code`." },
+  { name: "code", type: "string", required: true, description: "The code received on the redirect." },
+  { name: "redirect_uri", type: "string", required: true, description: "Must match the redirect_uri used in /oauth-authorize." },
+  { name: "client_id", type: "string", required: true, description: "Your OAuth client ID." },
+  { name: "client_secret", type: "string", description: "Required for confidential clients." },
+  { name: "code_verifier", type: "string", description: "Required if PKCE was used." },
+]} title="Body" />
+
+```bash
+curl -X POST 'https://api.wundertreos.com/functions/v1/oauth-token' \
+  -H 'Content-Type: application/x-www-form-urlencoded' \
+  -d 'grant_type=authorization_code' \
+  -d 'code=ac_8f3c2a1d' \
+  -d 'redirect_uri=https://your-app.com/callback' \
+  -d 'client_id=your_client' \
+  -d 'client_secret=your_secret'
+```
+
+## Refresh an access token
+
+<ParamTable rows={[
+  { name: "grant_type", type: "string", required: true, description: "Must be `refresh_token`." },
+  { name: "refresh_token", type: "string", required: true, description: "The refresh token from a prior exchange." },
+  { name: "client_id", type: "string", required: true, description: "Your OAuth client ID." },
+  { name: "client_secret", type: "string", description: "Required for confidential clients." },
+]} title="Body" />
+
+## Response
+
+```json
+{
+  "access_token": "at_8f3c2a1d9e7b4f6a...",
+  "token_type": "Bearer",
+  "expires_in": 3600,
+  "refresh_token": "rt_1d3e5c7f9a1d3e5c...",
+  "scope": "contacts:read contacts:write webhooks:write"
+}
+```

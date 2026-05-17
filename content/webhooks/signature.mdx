@@ -1,0 +1,56 @@
+export const meta = {
+  title: "Signature verification",
+  description: "Verify webhook authenticity using the X-Wunder-Signature header and HMAC-SHA256.",
+};
+
+Every webhook delivery includes an HMAC‑SHA256 signature so you can verify the payload came from Wundertre and wasn't tampered with in transit.
+
+## The signature header
+
+```text
+X-Wunder-Signature: sha256=8c0f7d2b9a1e5f3c4d6a8b0e2c4f6a8d1b3e5c7f9a1d3e5c7f9a1d3e5c7f9a1d
+```
+
+The value is the lowercase hex digest of:
+
+```text
+HMAC-SHA256(signing_secret, raw_request_body)
+```
+
+## Verification (Node.js)
+
+```js
+import crypto from "crypto";
+
+export function verifyWundertreSignature(req, signingSecret) {
+  const header = req.headers["x-wunder-signature"];
+  if (!header || !header.startsWith("sha256=")) return false;
+  const expected = crypto
+    .createHmac("sha256", signingSecret)
+    .update(req.rawBody) // make sure this is the *raw* body, not parsed JSON
+    .digest("hex");
+  const provided = header.slice("sha256=".length);
+  // Constant‑time compare
+  return crypto.timingSafeEqual(Buffer.from(expected, "hex"), Buffer.from(provided, "hex"));
+}
+```
+
+## Verification (Python)
+
+```python
+import hmac, hashlib
+
+def verify_signature(raw_body: bytes, header: str, signing_secret: str) -> bool:
+    if not header or not header.startswith("sha256="):
+        return False
+    expected = hmac.new(signing_secret.encode(), raw_body, hashlib.sha256).hexdigest()
+    return hmac.compare_digest(expected, header.split("=", 1)[1])
+```
+
+<Callout type="warn" title="Always verify against the RAW body">
+Most frameworks parse JSON bodies before your handler runs. Capture the raw request bytes (in Express use <code>express.raw()</code> for the webhook route) — re‑serializing the parsed JSON will produce a different signature.
+</Callout>
+
+## Rotating the signing secret
+
+You can rotate the signing secret from the dashboard. During a rotation window Wundertre signs deliveries with **both** the old and new secret — accept either for ~24 hours, then drop the old one.

@@ -1,0 +1,26 @@
+export const meta = {
+  title: "Delete webhook subscription",
+  description: "Unsubscribe from events by deleting a webhook subscription.",
+};
+
+<MethodBadge method="DELETE" path="/api-webhook-subscriptions/:id" />
+
+Requires the `webhooks:write` scope.
+
+## Path parameters
+
+<ParamTable rows={[
+  { name: "id", type: "string", required: true, description: "The webhook subscription ID (e.g. wh_a1b2c3)." },
+]} title="Path" />
+
+## Example request
+
+```bash
+curl -X DELETE \
+  'https://api.wundertreos.com/functions/v1/api-webhook-subscriptions/wh_a1b2c3' \
+  -H 'Authorization: Bearer YOUR_ACCESS_TOKEN'
+```
+
+## Response
+
+Returns `204 No Content` on success.

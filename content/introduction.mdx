@@ -1,0 +1,45 @@
+export const meta = {
+  title: "Introduction",
+  description: "The Wundertre OS API gives you programmatic access to contacts, deals, activities, and webhooks across your growth pipeline.",
+};
+
+The **Wundertre OS API** is a REST API for managing your customer growth pipeline programmatically — contacts, deals, activities, and real‑time webhook events.
+
+It powers both internal Wundertre apps and external integrations, including the official Zapier app.
+
+## Base URL
+
+All endpoints are served under a single base URL:
+
+```bash
+https://api.wundertreos.com/functions/v1/
+```
+
+Every endpoint path documented in this reference is appended to that base, e.g. `GET /api-contacts` resolves to `https://api.wundertreos.com/functions/v1/api-contacts`.
+
+## Who this is for
+
+- **Developers** building custom integrations against Wundertre data
+- **Partners** embedding Wundertre into their own platforms
+- **Power users** automating workflows via Zapier, Make, or n8n
+
+If you just want point‑and‑click automation, jump straight to the [Zapier Integration Guide](/zapier/overview) — no code required.
+
+## Conventions
+
+- All requests and responses are JSON (`Content-Type: application/json`).
+- Timestamps are ISO 8601 in UTC (e.g. `2026-05-17T14:23:00Z`).
+- IDs are UUIDs.
+- List endpoints support cursor‑style pagination via `limit` and `offset`.
+
+<Callout type="tip" title="Get an API key in 60 seconds">
+Sign in to your Wundertre workspace → **Settings → Developer → API keys** to generate a key.
+Then head over to [Authentication](/authentication) for example requests.
+</Callout>
+
+## What's next
+
+- [Authentication](/authentication) — get a Bearer token or API key
+- [Rate limits & best practices](/rate-limits)
+- [Contacts API](/contacts/list) — the core resource
+- [Webhooks](/webhooks/events) — receive events in real time

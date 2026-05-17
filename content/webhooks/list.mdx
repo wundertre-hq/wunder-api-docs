@@ -1,0 +1,34 @@
+export const meta = {
+  title: "List webhook subscriptions",
+  description: "List active webhook subscriptions for the current credential.",
+};
+
+<MethodBadge method="GET" path="/api-webhook-subscriptions" />
+
+Requires the `webhooks:read` scope.
+
+## Example request
+
+```bash
+curl -X GET \
+  'https://api.wundertreos.com/functions/v1/api-webhook-subscriptions' \
+  -H 'Authorization: Bearer YOUR_ACCESS_TOKEN'
+```
+
+## Response
+
+```json
+{
+  "data": [
+    {
+      "id": "wh_a1b2c3",
+      "target_url": "https://hooks.zapier.com/hooks/catch/123/abc/",
+      "event_types": ["contact.created", "contact.updated"],
+      "description": "Zapier — New Contact trigger",
+      "signing_secret": "whsec_...",
+      "active": true,
+      "created_at": "2026-04-01T08:00:00Z"
+    }
+  ]
+}
+```

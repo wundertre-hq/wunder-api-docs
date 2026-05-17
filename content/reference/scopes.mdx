@@ -1,0 +1,37 @@
+export const meta = {
+  title: "Scopes",
+  description: "Permissions you can request during the OAuth flow.",
+};
+
+When you start the OAuth flow at [`/oauth-authorize`](/oauth/authorize), pass a space‑separated list of scopes. Request the **minimum** scopes your integration needs.
+
+<SchemaTable title="Available scopes" rows={[
+  { name: "contacts:read", type: "scope", description: "Read contacts and their activities. Allows GET /api-contacts, /api-contacts/:id, /api-contacts/:id/deals, /api-contacts/:id/activities, and POST /api-contacts-search." },
+  { name: "contacts:write", type: "scope", description: "Create, update, and delete contacts. Implies contacts:read. Allows POST/PATCH/DELETE on /api-contacts." },
+  { name: "webhooks:read", type: "scope", description: "List webhook subscriptions owned by the current credential." },
+  { name: "webhooks:write", type: "scope", description: "Create and delete webhook subscriptions. Implies webhooks:read." },
+]} />
+
+## Example
+
+```text
+scope=contacts:read%20contacts:write%20webhooks:write
+```
+
+<Callout type="tip">
+A Zapier integration that creates contacts and subscribes to triggers typically needs <code>contacts:read contacts:write webhooks:write</code>.
+</Callout>
+
+## Scope errors
+
+Calling an endpoint without the required scope returns:
+
+```json
+{
+  "error": "insufficient_scope",
+  "message": "This endpoint requires the contacts:write scope.",
+  "required_scope": "contacts:write"
+}
+```
+
+with HTTP status `403`.
