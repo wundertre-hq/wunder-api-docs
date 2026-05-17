@@ -13,6 +13,8 @@ export default defineConfig({
         enforce: "pre",
         ...mdx({
           providerImportSource: "@mdx-js/react",
+          jsxRuntime: "automatic",
+          development: false,
           remarkPlugins: [remarkGfm],
           rehypePlugins: [rehypeSlug],
         }),
