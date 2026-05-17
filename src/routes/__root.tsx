@@ -89,8 +89,7 @@ function RootComponent() {
           {/* Mobile top bar */}
           <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-border bg-background/80 px-4 backdrop-blur lg:hidden">
             <div className="flex items-center gap-2">
-              <div className="h-6 w-6 rounded-md bg-gradient-to-br from-[var(--cyan)] to-[var(--magenta)]" />
-              <span className="text-sm font-semibold">WundertreOS</span>
+              <img src={(new URL('../assets/wundertre-os-logo-white.png', import.meta.url)).href} alt="WundertreOS" className="h-6 w-auto" />
             </div>
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetTrigger asChild>
