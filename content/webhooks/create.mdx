@@ -5,6 +5,12 @@ export const meta = {
 
 <MethodBadge method="POST" path="/api-webhook-subscriptions" />
 
+<TryIt method="POST" path="/api-webhook-subscriptions" body={`{
+  "target_url": "https://example.com/webhook",
+  "event_types": ["contact.created"]
+}`} />
+
+
 Requires the `webhooks:write` scope. Implements the Zapier [REST Hooks](https://zapier.com/developer/documentation/v2/rest-hooks/) subscribe contract.
 
 ## Request body

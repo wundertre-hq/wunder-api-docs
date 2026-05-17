@@ -5,6 +5,9 @@ export const meta = {
 
 <MethodBadge method="GET" path="/api-contacts" />
 
+<TryIt method="GET" path="/api-contacts" query={[{ name: "limit", value: "50" }]} />
+
+
 Returns contacts in the caller's organization. Designed to support both general listing and Zapier‑style polling triggers.
 
 ## Query parameters

@@ -5,6 +5,12 @@ export const meta = {
 
 <MethodBadge method="PATCH" path="/api-contacts/:id" />
 
+<TryIt method="PATCH" path="/api-contacts/:id" body={`{
+  "tags": ["lead", "qualified"],
+  "stage": "qualified"
+}`} />
+
+
 Requires the `contacts:write` scope. Only fields you include are updated; everything else is left untouched. Unknown fields are silently dropped.
 
 ## Path parameters
