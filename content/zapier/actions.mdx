@@ -30,7 +30,7 @@ Only fields you populate in the Zap are sent in the body. Updatable: `first_name
 Search by `email`, `phone`, `first_name`, `last_name`, or `tags` (contact must contain ALL tags). Returns up to `limit` matches (default 10, max 50). Use Zapier's **"Create WundertreOS contact if it doesn't exist yet"** toggle to chain straight into a Create Contact step.
 
 <Callout type="info" title="Deals and activities are read‑only over the public API">
-The current public API exposes deals and activities as read‑only endpoints (<code>GET /api-deals</code>, <code>GET /api-deals/:contact_id</code>, <code>GET /api-activities</code>). They power Zapier triggers and search steps but cannot be created or updated via Zapier actions yet. Create deals and log activities from inside WundertreOS, then trigger downstream Zaps via <a href="/zapier/triggers">deal.created / deal.updated</a> events.
+The current public API exposes deals and activities as read‑only endpoints (<code>GET /api-deals</code>, <code>GET /api-contacts/:id/deals</code>, <code>GET /api-activities</code>). They power Zapier triggers and search steps but cannot be created or updated via Zapier actions yet. Create deals and log activities from inside WundertreOS, then trigger downstream Zaps via <a href="/zapier/triggers">deal.created / deal.updated</a> events.
 </Callout>
 
 <Callout type="tip" title="Idempotent Find + Create">
