@@ -15,7 +15,7 @@ All endpoints are served under a single base URL:
 https://api.wundertreos.com/functions/v1/
 ```
 
-Every endpoint path documented in this reference is appended to that base, e.g. `GET /api-contacts` resolves to `https://api.wundertreos.com/functions/v1/api-contacts`.
+Every endpoint path in this reference is appended to that base, e.g. `GET /api-contacts` resolves to `https://api.wundertreos.com/functions/v1/api-contacts`.
 
 ## Who this is for
 
@@ -30,7 +30,10 @@ If you just want point‑and‑click automation, jump straight to the [Zapier In
 - All requests and responses are JSON (`Content-Type: application/json`).
 - Timestamps are ISO 8601 in UTC (e.g. `2026-05-17T14:23:00Z`).
 - IDs are UUIDs.
+- Every resource is scoped to an **organization** (`org_id`). A credential is bound to exactly one org.
 - List endpoints support cursor‑style pagination via `limit` and `offset`.
+- Successful list responses wrap results in `{ "data": [...] }`. Single‑object responses use `{ "data": { ... } }`.
+- Errors return `{ "error": "<code>", "message": "..." }` with an appropriate HTTP status.
 
 <Callout type="tip" title="Get an API key in 60 seconds">
 Sign in to your WundertreOS workspace → **Settings → Developer → API keys** to generate a key.

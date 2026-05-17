@@ -3,13 +3,13 @@ export const meta = {
   description: "Permissions you can request during the OAuth flow.",
 };
 
-When you start the OAuth flow at [`/oauth-authorize`](/oauth/authorize), pass a space‑separated list of scopes. Request the **minimum** scopes your integration needs.
+When you start the OAuth flow at [`/oauth-authorize`](/oauth/authorize), pass a space‑separated list of scopes. Request the **minimum** scopes your integration needs. The same scope strings apply to API keys (configured when you create the key in the dashboard).
 
 <SchemaTable title="Available scopes" rows={[
-  { name: "contacts:read", type: "scope", description: "Read contacts and their activities. Allows GET /api-contacts, /api-contacts/:id, /api-contacts/:id/deals, /api-contacts/:id/activities, and POST /api-contacts-search." },
-  { name: "contacts:write", type: "scope", description: "Create, update, and delete contacts. Implies contacts:read. Allows POST/PATCH/DELETE on /api-contacts." },
-  { name: "webhooks:read", type: "scope", description: "List webhook subscriptions owned by the current credential." },
-  { name: "webhooks:write", type: "scope", description: "Create and delete webhook subscriptions. Implies webhooks:read." },
+  { name: "contacts:read", type: "scope", description: "Read contacts, deals, activities, and search. Required by GET /api-deals, GET /api-activities, and POST /api-contacts-search. GET /api-contacts and its sub-resources (/:id, /:id/deals, /:id/activities) only require a valid credential — no explicit scope check." },
+  { name: "contacts:write", type: "scope", description: "Create, update, and delete contacts. Required by POST /api-contacts, PATCH /api-contacts/:id, and DELETE /api-contacts/:id." },
+  { name: "webhooks:read", type: "scope", description: "List webhook subscriptions and retrieve a single subscription. Required by GET /api-webhook-subscriptions and GET /api-webhook-subscriptions/:id." },
+  { name: "webhooks:write", type: "scope", description: "Create and delete webhook subscriptions. Required by POST /api-webhook-subscriptions and DELETE /api-webhook-subscriptions/:id." },
 ]} />
 
 ## Example
@@ -19,19 +19,16 @@ scope=contacts:read%20contacts:write%20webhooks:write
 ```
 
 <Callout type="tip">
-A Zapier integration that creates contacts and subscribes to triggers typically needs <code>contacts:read contacts:write webhooks:write</code>.
+A Zapier‑style integration that lists contacts, creates contacts, and subscribes to triggers typically needs <code>contacts:read contacts:write webhooks:read webhooks:write</code>.
 </Callout>
 
 ## Scope errors
 
-Calling an endpoint without the required scope returns:
+Calling an endpoint without the required scope returns HTTP `403`:
 
 ```json
 {
-  "error": "insufficient_scope",
-  "message": "This endpoint requires the contacts:write scope.",
-  "required_scope": "contacts:write"
+  "error": "forbidden",
+  "message": "Scope 'contacts:write' is required."
 }
 ```
-
-with HTTP status `403`.

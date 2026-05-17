@@ -5,19 +5,13 @@ export const meta = {
 
 ## Rate limits
 
-The API uses a sliding‑window rate limit per credential:
-
-| Credential | Limit |
-| --- | --- |
-| OAuth Bearer token | **600 requests / minute** |
-| API key | **1,200 requests / minute** |
-| Webhook delivery retries | up to 5 attempts with exponential backoff |
+The API enforces a **sliding window of 60 requests per 60 seconds per organization**, regardless of credential type. Multiple API keys or OAuth tokens belonging to the same org share the same bucket.
 
 Every response includes rate‑limit headers:
 
 ```text
-X-RateLimit-Limit: 600
-X-RateLimit-Remaining: 587
+X-RateLimit-Limit: 60
+X-RateLimit-Remaining: 47
 X-RateLimit-Reset: 1747500000
 ```
 
@@ -25,19 +19,23 @@ When you exceed the limit you'll receive `429 Too Many Requests`:
 
 ```json
 {
-  "error": "rate_limited",
-  "message": "Too many requests. Retry after 12 seconds.",
+  "error": "rate_limit_exceeded",
+  "message": "Too many requests. Limit is 60 requests per 60 seconds.",
   "retry_after": 12
 }
 ```
 
-Respect the `Retry-After` header — backoff at least that long before retrying.
+Both the JSON body and the `Retry-After` header tell you how many seconds to wait. Back off at least that long before retrying.
+
+<Callout type="info">
+If the rate‑limiting subsystem is briefly unavailable, requests are allowed through (<em>fail open</em>) — your integration will not error out due to infrastructure hiccups.
+</Callout>
 
 ## Best practices
 
 ### Use webhooks instead of polling
 
-For change notifications, subscribe to [webhook events](/webhooks/events). Polling `GET /api-contacts?updated_since=...` works, but webhooks are lower‑latency and cheaper.
+For change notifications, subscribe to [webhook events](/webhooks/events). Polling `GET /api-contacts?updated_since=...` works, but webhooks are lower‑latency and consume far fewer of your 60 requests per minute.
 
 ### Batch where possible
 
@@ -49,22 +47,27 @@ Prefer one paginated list call over many `GET /:id` calls.
 GET /api-contacts?updated_since=2026-05-17T00:00:00Z
 ```
 
+Similar parameters exist on related endpoints:
+
+- `/api-deals` → `created_since`, `updated_since`
+- `/api-activities` → `created_since`
+- `/api-contacts/:id/deals` → `created_since`
+- `/api-contacts/:id/activities` → `created_since`
+
 ### Handle 5xx and 429 with exponential backoff
 
-A reasonable schedule: 1s, 2s, 4s, 8s, 16s, then give up and log.
-
-### Idempotency
-
-`POST` endpoints accept an optional `Idempotency-Key` header. Re‑sending the same key within 24 hours returns the original response without creating a duplicate.
-
-```bash
-curl -X POST 'https://api.wundertreos.com/functions/v1/api-contacts' \
-  -H 'Authorization: Bearer YOUR_TOKEN' \
-  -H 'Idempotency-Key: 8c1f...-import-row-742' \
-  -H 'Content-Type: application/json' \
-  -d '{"email":"jane@example.com"}'
-```
+A reasonable schedule: 1s, 2s, 4s, 8s, 16s, then log and give up. Always honor `Retry-After` first when present.
 
 ### Pagination
 
-All list endpoints accept `limit` (max 200, default 50) and `offset`. To page through everything, increment `offset` by `limit` until the result array is empty.
+List endpoints accept `limit` and `offset`. Defaults and caps vary by endpoint:
+
+| Endpoint | Default `limit` | Max `limit` |
+| --- | --- | --- |
+| `GET /api-contacts` | 100 | 200 |
+| `GET /api-deals` | 100 | 200 |
+| `GET /api-activities` | 100 | 200 |
+| `GET /api-contacts/:id/activities` | 50 | 200 |
+| `POST /api-contacts-search` | 10 | 50 |
+
+To page through everything, increment `offset` by `limit` until the result array is empty.
