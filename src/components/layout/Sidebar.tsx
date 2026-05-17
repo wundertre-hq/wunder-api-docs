@@ -86,6 +86,9 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
           </div>
         )}
       </nav>
+      <div className="border-t border-sidebar-border px-3 py-3">
+        <StatusBadge />
+      </div>
     </aside>
   );
 }
