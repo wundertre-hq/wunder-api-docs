@@ -16,6 +16,10 @@ Both methods authenticate to a single organization and are checked against the s
 
 This is the same flow used by the official Zapier app. Tokens are scoped to a single organization and a set of [scopes](/reference/scopes), and expire **1 hour** after issuance. Use the accompanying `refresh_token` to mint a new access token without re‑prompting the user.
 
+<Callout type="info" title="Bearer tokens cannot be generated manually">
+Bearer tokens are issued automatically through the OAuth 2.0 flow when connecting external apps such as Zapier. They cannot be generated manually. If you are testing the API directly or building a custom integration, use an [API key](#2-api-keys) instead.
+</Callout>
+
 There are two ways to obtain a Bearer token:
 
 ### a. Connect through Zapier (no code)
