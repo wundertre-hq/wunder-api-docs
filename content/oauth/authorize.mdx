@@ -5,18 +5,18 @@ export const meta = {
 
 <MethodBadge method="GET" path="/oauth-authorize" />
 
-Redirect the user's browser to this endpoint to begin the OAuth flow. WundertreOS will display a consent screen, then redirect back to your `redirect_uri` with an authorization code.
+Redirect the user's browser to this endpoint to begin the OAuth flow. WundertreOS validates the request, then renders an in‑app consent screen where the user picks an organization and approves your requested scopes. On approval, the user is redirected back to your `redirect_uri` with an authorization code.
 
 ## Query parameters
 
 <ParamTable rows={[
   { name: "client_id", type: "string", required: true, description: "Your OAuth client ID (from the WundertreOS developer dashboard)." },
   { name: "redirect_uri", type: "string", required: true, description: "Must exactly match a redirect URI registered with your client." },
-  { name: "response_type", type: "string", required: true, description: "Must be `code`." },
-  { name: "scope", type: "string", required: true, description: "Space-separated list of scopes (e.g. `contacts:read contacts:write`)." },
-  { name: "state", type: "string", required: true, description: "Opaque value echoed back to your redirect URI. Use it to prevent CSRF." },
-  { name: "code_challenge", type: "string", description: "Optional PKCE challenge (recommended for public clients)." },
-  { name: "code_challenge_method", type: "string", description: "If using PKCE, must be `S256`." },
+  { name: "response_type", type: "string", required: true, description: "Must be `code`. Any other value returns `unsupported_response_type`." },
+  { name: "scope", type: "string", required: true, description: "Space‑separated list of scopes (e.g. `contacts:read contacts:write`). Defaults to `contacts:read` if omitted. Every requested scope must be in your client's `allowed_scopes`." },
+  { name: "state", type: "string", description: "Opaque value echoed back to your redirect URI. Use it to prevent CSRF — strongly recommended." },
+  { name: "code_challenge", type: "string", description: "PKCE challenge (recommended for public clients)." },
+  { name: "code_challenge_method", type: "string", description: "If using PKCE, must be `S256`. `plain` is not supported." },
 ]} title="Query" />
 
 ## Example
@@ -33,7 +33,23 @@ https://api.wundertreos.com/functions/v1/oauth-authorize
 ## Successful redirect
 
 ```text
-https://your-app.com/callback?code=ac_8f3c2a1d&state=abc123
+https://your-app.com/callback?code=8f3c2a1d9e7b4f6a5c2d1e0f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b&state=abc123
 ```
 
-Exchange the `code` at [`POST /oauth-token`](/oauth/token).
+Authorization codes are single‑use and short‑lived. Exchange them immediately at [`POST /oauth-token`](/oauth/token).
+
+## Errors
+
+If the user clicks **Deny**, or your request is malformed, WundertreOS redirects to your `redirect_uri` with an `error` query parameter:
+
+```text
+https://your-app.com/callback?error=access_denied&state=abc123
+```
+
+| `error` | When |
+| --- | --- |
+| `invalid_request` | Missing `client_id` / `redirect_uri`. |
+| `invalid_client` | Unknown or inactive client. |
+| `invalid_scope` | One or more requested scopes are not allowed for this client. |
+| `unsupported_response_type` | `response_type` was not `code`. |
+| `access_denied` | The user clicked Deny on the consent screen. |

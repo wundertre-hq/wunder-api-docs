@@ -1,11 +1,13 @@
 export const meta = {
   title: "Identity (me)",
-  description: "Return the workspace and user identity associated with the current access token.",
+  description: "Return the user and organization identity associated with the current access token.",
 };
 
 <MethodBadge method="GET" path="/oauth-me" />
 
-Zapier and similar platforms call this immediately after the OAuth dance to display the connected account in the UI ("Connected as Jane Doe @ Acme").
+Zapier and similar platforms call this immediately after the OAuth dance to display the connected account in the UI ("Connected as Acme").
+
+Works with both Bearer tokens and API keys.
 
 ## Example request
 
@@ -18,16 +20,18 @@ curl -X GET 'https://api.wundertreos.com/functions/v1/oauth-me' \
 
 ```json
 {
-  "user": {
-    "id": "u_1234",
-    "email": "jane@acme.com",
-    "name": "Jane Doe"
-  },
-  "workspace": {
-    "id": "ws_abc",
-    "name": "Acme Inc",
-    "slug": "acme"
-  },
-  "scopes": ["contacts:read", "contacts:write", "webhooks:write"]
+  "id": "u1b1f3a0-4d2e-4f9a-9b1c-2d4e5f6a7b8c",
+  "email": "jane@acme.com",
+  "org_id": "a1b2c3d4-1111-2222-3333-444455556666",
+  "org_name": "Acme Inc",
+  "org_slug": "acme"
 }
 ```
+
+<SchemaTable rows={[
+  { name: "id", type: "uuid", description: "The authenticated user's ID. For API keys, this is the user who created the key (may be empty if the key was created without a user context)." },
+  { name: "email", type: "string", nullable: true, description: "The user's email." },
+  { name: "org_id", type: "uuid", description: "The organization this credential is scoped to." },
+  { name: "org_name", type: "string", description: "Display name of the organization." },
+  { name: "org_slug", type: "string", nullable: true, description: "URL‑friendly slug." },
+]} />

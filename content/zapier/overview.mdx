@@ -1,29 +1,24 @@
 export const meta = {
   title: "Zapier integration overview",
-  description: "Automate WundertreOS with 6,000+ apps using the official Zapier integration — no code required.",
+  description: "What the official WundertreOS Zapier app can do.",
 };
 
-The official **WundertreOS** Zapier app lets non‑developers connect WundertreOS to 6,000+ other tools (Gmail, Slack, Google Sheets, HubSpot, Notion, Stripe, Calendly, you name it).
+The official **WundertreOS** Zapier app lets you connect your growth pipeline to 6,000+ apps without writing any code. It is implemented directly on top of the public API documented in this site — every Zapier trigger is a polling `GET` against `/api-contacts`, `/api-deals`, or `/api-activities`, and every action is a `POST` or `PATCH` against the same endpoints. Real‑time triggers (REST Hooks) use the [webhook subscription endpoints](/webhooks/list).
 
-It's built on the same public API documented in this reference, so anything you can do in code via the API you can also do in a Zap — and vice versa.
+## What you can do
 
-## What you can build
+- **Triggers**: react to new or updated contacts, contacts that get tagged or enriched, and new or updated deals — see [Triggers](/zapier/triggers).
+- **Actions**: create or update contacts, find a contact, and create a deal — see [Actions](/zapier/actions).
+- **Search + Create combo**: every Find step supports Zapier's "create if not found" toggle so you can de‑dupe contacts safely.
 
-- **Push WundertreOS data out**: when a contact is tagged `vip`, send a Slack DM to the account owner
-- **Pull data in**: when a new Stripe customer is created, add them as a WundertreOS contact and tag them `customer`
-- **Two‑way sync**: keep a Google Sheet in sync with your contact list
-- **Trigger workflows**: when a deal moves to `won`, kick off an onboarding email sequence in your ESP
+## Authentication
 
-## How it's structured
+The Zapier connection runs the standard [OAuth 2.0 authorization code flow](/oauth/authorize) and stores a refresh token that's rotated on every refresh. Authenticated calls use `Authorization: Bearer …`.
 
-| Concept | What it does | Powered by |
-| --- | --- | --- |
-| **Triggers** | Run a Zap when something happens in WundertreOS | Webhook subscriptions |
-| **Actions** | Make something happen in WundertreOS as part of a Zap | REST endpoints |
-| **Searches** | Find data in WundertreOS without changing it | `POST /api-contacts-search` |
+Default Zapier scope set:
 
-## Next steps
+```text
+contacts:read contacts:write webhooks:read webhooks:write
+```
 
-1. [How to connect](/zapier/connect) — link Zapier to your WundertreOS workspace
-2. [Triggers](/zapier/triggers) — full list of available triggers
-3. [Actions](/zapier/actions) — full list of available actions
+Walk through the connect flow in [Connect WundertreOS to Zapier](/zapier/connect).
