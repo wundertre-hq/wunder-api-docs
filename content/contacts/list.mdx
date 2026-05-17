@@ -1,18 +1,20 @@
 export const meta = {
   title: "List contacts",
-  description: "Retrieve a paginated list of contacts in the workspace, optionally filtered by event or update time.",
+  description: "Retrieve a paginated list of contacts in your organization, optionally filtered by update time or event type.",
 };
 
 <MethodBadge method="GET" path="/api-contacts" />
 
+Returns contacts in the caller's organization. Designed to support both general listing and Zapier‑style polling triggers.
+
 ## Query parameters
 
 <ParamTable rows={[
-  { name: "event", type: "string", description: "Filter to contacts touched by a specific event type (e.g. contact.created, contact.enriched). Useful for Zapier triggers." },
   { name: "updated_since", type: "string (ISO 8601)", description: "Return only contacts updated at or after this timestamp." },
-  { name: "limit", type: "integer", description: "Max number of contacts to return. Default 50, max 200." },
-  { name: "offset", type: "integer", description: "Number of contacts to skip. Default 0." },
-  { name: "order", type: "string", description: "Sort order. One of updated_at.desc (default), updated_at.asc, created_at.desc, created_at.asc." },
+  { name: "event", type: "string", description: "Polling‑trigger filter. One of created, tag_added, enriched. When set to created, results are sorted by created_at and combined with updated_since as a created_at filter. When set to enriched, results are filtered to contacts with a non‑null enriched_at and sorted by enriched_at." },
+  { name: "limit", type: "integer", description: "Max contacts to return. Default 100, max 200." },
+  { name: "offset", type: "integer", description: "Pagination offset. Default 0." },
+  { name: "order", type: "string", description: "asc or desc (default desc — newest first)." },
 ]} title="Query" />
 
 ## Example request
@@ -28,7 +30,7 @@ const res = await fetch(
   "https://api.wundertreos.com/functions/v1/api-contacts?limit=50",
   { headers: { Authorization: `Bearer ${token}` } }
 );
-const { data, pagination } = await res.json();
+const { data, meta } = await res.json();
 ```
 
 ## Response
@@ -38,34 +40,72 @@ const { data, pagination } = await res.json();
   "data": [
     {
       "id": "c8b1f3a0-4d2e-4f9a-9b1c-2d4e5f6a7b8c",
-      "email": "jane@example.com",
+      "org_id": "a1b2c3d4-1111-2222-3333-444455556666",
       "first_name": "Jane",
       "last_name": "Doe",
+      "email": "jane@example.com",
       "phone": "+15551234567",
       "company": "Acme Inc",
+      "company_id": null,
+      "job_title": "Head of Growth",
+      "industry": "SaaS",
+      "address_line1": "100 Market St",
+      "address_line2": null,
+      "city": "San Francisco",
+      "state": "CA",
+      "zip": "94105",
+      "country": "US",
       "tags": ["lead", "vip"],
-      "lifecycle_stage": "customer",
-      "owner_id": "u_1234",
+      "status": "active",
+      "stage": "customer",
+      "source": "api",
+      "score": 72,
+      "notes": null,
+      "linkedin_url": "https://linkedin.com/in/janedoe",
+      "enriched_at": "2026-05-17T11:02:08Z",
+      "enrichment_status": "complete",
+      "email_subscribed": true,
       "created_at": "2026-04-12T09:31:22Z",
-      "updated_at": "2026-05-17T11:02:08Z"
+      "updated_at": "2026-05-17T11:02:08Z",
+      "created_by": "u1b1f3a0-4d2e-4f9a-9b1c-2d4e5f6a7b8c"
     }
   ],
-  "pagination": { "limit": 50, "offset": 0, "total": 1 }
+  "meta": { "limit": 50, "offset": 0, "count": 1 }
 }
 ```
 
 <SchemaTable rows={[
   { name: "data", type: "Contact[]", description: "Array of contact objects." },
   { name: "data[].id", type: "uuid", description: "Unique contact ID." },
+  { name: "data[].org_id", type: "uuid", description: "Organization the contact belongs to." },
+  { name: "data[].first_name", type: "string", description: "Given name." },
+  { name: "data[].last_name", type: "string", description: "Family name." },
   { name: "data[].email", type: "string", nullable: true, description: "Primary email address." },
-  { name: "data[].first_name", type: "string", nullable: true, description: "Given name." },
-  { name: "data[].last_name", type: "string", nullable: true, description: "Family name." },
-  { name: "data[].phone", type: "string", nullable: true, description: "E.164 phone number." },
-  { name: "data[].company", type: "string", nullable: true, description: "Company name." },
-  { name: "data[].tags", type: "string[]", description: "Tags applied to this contact." },
-  { name: "data[].lifecycle_stage", type: "string", nullable: true, description: "lead, mql, sql, customer, evangelist, or null." },
-  { name: "data[].owner_id", type: "string", nullable: true, description: "ID of the WundertreOS user who owns this contact." },
-  { name: "data[].created_at", type: "string (ISO 8601)", description: "When the contact was created." },
-  { name: "data[].updated_at", type: "string (ISO 8601)", description: "Last modification time." },
-  { name: "pagination", type: "object", description: "{ limit, offset, total }" },
+  { name: "data[].phone", type: "string", nullable: true, description: "Phone number." },
+  { name: "data[].company", type: "string", nullable: true, description: "Free‑text company name." },
+  { name: "data[].company_id", type: "uuid", nullable: true, description: "Linked company record, if any." },
+  { name: "data[].job_title", type: "string", nullable: true, description: "Job title." },
+  { name: "data[].industry", type: "string", nullable: true, description: "Industry." },
+  { name: "data[].address_line1", type: "string", nullable: true },
+  { name: "data[].address_line2", type: "string", nullable: true },
+  { name: "data[].city", type: "string", nullable: true },
+  { name: "data[].state", type: "string", nullable: true },
+  { name: "data[].zip", type: "string", nullable: true },
+  { name: "data[].country", type: "string", nullable: true },
+  { name: "data[].tags", type: "string[]", description: "Tags applied to the contact." },
+  { name: "data[].status", type: "string", description: "Lifecycle status (e.g. active, unsubscribed)." },
+  { name: "data[].stage", type: "string", nullable: true, description: "Pipeline stage label." },
+  { name: "data[].source", type: "string", description: "How the contact was created (e.g. api, import, form)." },
+  { name: "data[].score", type: "integer", nullable: true, description: "Lead score." },
+  { name: "data[].notes", type: "string", nullable: true, description: "Free‑form notes." },
+  { name: "data[].linkedin_url", type: "string", nullable: true },
+  { name: "data[].enriched_at", type: "string (ISO 8601)", nullable: true, description: "When enrichment last ran." },
+  { name: "data[].enrichment_status", type: "string", nullable: true },
+  { name: "data[].email_subscribed", type: "boolean" },
+  { name: "data[].created_at", type: "string (ISO 8601)" },
+  { name: "data[].updated_at", type: "string (ISO 8601)" },
+  { name: "data[].created_by", type: "uuid", nullable: true, description: "User who created the contact." },
+  { name: "meta.limit", type: "integer" },
+  { name: "meta.offset", type: "integer" },
+  { name: "meta.count", type: "integer", description: "Number of rows returned in this page." },
 ]} />

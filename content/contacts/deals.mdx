@@ -8,15 +8,16 @@ export const meta = {
 ## Path parameters
 
 <ParamTable rows={[
-  { name: "id", type: "uuid", required: true, description: "The contact ID." },
+  { name: "id", type: "uuid", required: true, description: "The contact ID. Must belong to the caller's organization." },
 ]} title="Path" />
 
 ## Query parameters
 
 <ParamTable rows={[
-  { name: "limit", type: "integer", description: "Default 50, max 200." },
-  { name: "offset", type: "integer", description: "Default 0." },
+  { name: "created_since", type: "string (ISO 8601)", description: "Return only deals created at or after this timestamp." },
 ]} title="Query" />
+
+Results are sorted by `created_at` descending.
 
 ## Example request
 
@@ -32,18 +33,19 @@ curl -X GET \
 {
   "data": [
     {
-      "id": "d_9f8e7d6c",
+      "id": "d1e2f3a4-1111-2222-3333-444455556666",
+      "org_id": "a1b2c3d4-1111-2222-3333-444455556666",
+      "contact_id": "c8b1f3a0-4d2e-4f9a-9b1c-2d4e5f6a7b8c",
       "title": "Acme — Annual plan",
       "value": 12000,
-      "currency": "USD",
-      "stage": "negotiation",
-      "contact_id": "c8b1f3a0-4d2e-4f9a-9b1c-2d4e5f6a7b8c",
-      "owner_id": "u_1234",
-      "expected_close_date": "2026-06-30",
+      "stage_id": "s1a2b3c4-…",
+      "pipeline_id": "p1a2b3c4-…",
+      "status": "open",
       "created_at": "2026-05-01T10:00:00Z",
       "updated_at": "2026-05-17T12:00:00Z"
     }
-  ],
-  "pagination": { "limit": 50, "offset": 0, "total": 1 }
+  ]
 }
 ```
+
+For the full deal schema (including `currency`, `expected_close_date`, `assigned_to`, `won_at`, `lost_at`, etc.) see [List deals](/deals/list).

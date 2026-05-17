@@ -1,6 +1,6 @@
 export const meta = {
   title: "Delete contact",
-  description: "Permanently remove a contact and its associated activities.",
+  description: "Permanently remove a contact.",
 };
 
 <MethodBadge method="DELETE" path="/api-contacts/:id" />
@@ -8,13 +8,13 @@ export const meta = {
 Requires the `contacts:write` scope.
 
 <Callout type="warn" title="Destructive">
-Deletion cascades to the contact's notes and activity history. Linked deals are preserved but unlink from the contact.
+Deletion is permanent. Related activity rows referencing the contact may also be removed depending on workspace settings.
 </Callout>
 
 ## Path parameters
 
 <ParamTable rows={[
-  { name: "id", type: "uuid", required: true, description: "The contact ID." },
+  { name: "id", type: "uuid", required: true, description: "The contact ID. Must belong to the caller's organization." },
 ]} title="Path" />
 
 ## Example request
@@ -28,3 +28,5 @@ curl -X DELETE \
 ## Response
 
 Returns `204 No Content` on success.
+
+`403` if the credential lacks `contacts:write`. `500 server_error` if the database delete fails.
