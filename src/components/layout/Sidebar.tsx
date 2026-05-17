@@ -18,11 +18,10 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   return (
     <aside className="flex h-full w-full flex-col bg-sidebar text-sidebar-foreground">
       <div className="flex items-center gap-2 px-5 py-5 border-b border-sidebar-border">
-        <div className="h-7 w-7 rounded-md bg-gradient-to-br from-[var(--cyan)] to-[var(--magenta)]" />
-        <div className="flex flex-col leading-tight">
-          <span className="text-sm font-semibold tracking-tight text-foreground">WundertreOS</span>
+        <Link to="/$" params={{ _splat: "" }} className="flex items-center gap-2">
+          <img src={logo} alt="WundertreOS" className="h-7 w-auto" />
           <span className="text-[10px] uppercase tracking-wider text-muted-foreground">API Docs</span>
-        </div>
+        </Link>
       </div>
       <div className="px-3 py-3 border-b border-sidebar-border">
         <div className="relative">
