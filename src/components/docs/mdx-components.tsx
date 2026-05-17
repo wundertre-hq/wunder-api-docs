@@ -4,6 +4,7 @@ import { MethodBadge } from "@/components/docs/MethodBadge";
 import { ParamTable, SchemaTable } from "@/components/docs/Tables";
 import { Callout } from "@/components/docs/Callout";
 import { CodeTabs, Tab } from "@/components/docs/CodeTabs";
+import { TryIt } from "@/components/docs/TryIt";
 
 function Pre(props: ComponentProps<"pre">) {
   const child = props.children as { props?: { className?: string; children?: string } } | undefined;
@@ -24,5 +25,6 @@ export const mdxComponents = {
   Callout,
   CodeTabs,
   Tab,
+  TryIt,
   Lead: ({ children }: { children: ReactNode }) => <p className="lead">{children}</p>,
 };
