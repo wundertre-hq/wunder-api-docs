@@ -5,15 +5,17 @@ export const meta = {
 
 <MethodBadge method="POST" path="/api-webhook-subscriptions" />
 
-Requires the `webhooks:write` scope.
+Requires the `webhooks:write` scope. Implements the Zapier [REST Hooks](https://zapier.com/developer/documentation/v2/rest-hooks/) subscribe contract.
 
 ## Request body
 
 <ParamTable rows={[
-  { name: "target_url", type: "string (https URL)", required: true, description: "HTTPS endpoint that will receive POST deliveries." },
-  { name: "event_types", type: "string[]", required: true, description: "Array of event types to subscribe to. See Event types reference." },
-  { name: "description", type: "string", description: "Optional human-readable label shown in the dashboard." },
+  { name: "target_url", type: "string (URL)", required: true, description: "URL that will receive POST deliveries. Must be a valid absolute URL." },
+  { name: "event_types", type: "string[]", required: true, description: "Non‑empty array of event types to subscribe to. See Event types." },
+  { name: "description", type: "string", description: "Optional human‑readable label shown in the dashboard." },
 ]} title="Body" />
+
+Valid `event_types` values: `contact.created`, `contact.updated`, `contact.tag_added`, `contact.enriched`, `contact.note_added`, `deal.created`, `deal.updated`.
 
 ## Example request
 
@@ -31,22 +33,29 @@ curl -X POST \
 
 ## Response
 
-Returns `201 Created` with the subscription, including a `signing_secret` you'll need for [signature verification](/webhooks/signature):
+Returns `201 Created` with the subscription, including the `secret` used to sign deliveries:
 
 ```json
 {
   "data": {
-    "id": "wh_a1b2c3",
+    "id": "a1b2c3d4-1111-2222-3333-444455556666",
     "target_url": "https://example.com/wundertre/webhook",
     "event_types": ["contact.created", "contact.tag_added"],
+    "secret": "8f3c2a1d9e7b4f6a5c2d1e0f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b",
+    "enabled": true,
     "description": "Sync new leads to internal CRM",
-    "signing_secret": "whsec_8f3c2a1d9e7b4f6a",
-    "active": true,
     "created_at": "2026-05-17T14:30:00Z"
   }
 }
 ```
 
-<Callout type="warn">
-The <code>signing_secret</code> is shown only on creation. Store it securely — you cannot retrieve it later.
+<Callout type="warn" title="Store the secret immediately">
+The <code>secret</code> is only returned on creation. WundertreOS does not expose it on subsequent list or get calls. Save it in your integration's config before the response is discarded — see <a href="/webhooks/signature">Verify signatures</a>.
 </Callout>
+
+## Errors
+
+| Status | `error` | When |
+| --- | --- | --- |
+| 400 | `invalid_request` | `target_url` missing or not a URL; `event_types` empty; an event type is not in the supported set. |
+| 403 | `forbidden` | Credential lacks `webhooks:write`. |

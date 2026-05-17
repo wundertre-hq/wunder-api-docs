@@ -8,11 +8,13 @@ The WundertreOS API supports **two authentication methods**. Use whichever fits 
 | Method | Best for | Header |
 | --- | --- | --- |
 | **OAuth 2.0 Bearer token** | Third‑party apps acting on behalf of a WundertreOS user (Zapier, Make, your own SaaS) | `Authorization: Bearer <token>` |
-| **API key** | First‑party integrations, server‑to‑server scripts, internal automation | `X-API-Key: wt_...` |
+| **API key** | First‑party integrations, server‑to‑server scripts, internal automation | `X-API-Key: <key>` |
+
+Both methods authenticate to a single organization and are checked against the same scope rules. Bearer tokens and API keys are stored only as SHA‑256 hashes server‑side — the raw value is shown to you exactly once at creation.
 
 ## 1. OAuth 2.0 Bearer tokens
 
-This is the same flow used by the official Zapier app. Tokens are scoped to a single workspace and a set of [scopes](/reference/scopes).
+This is the same flow used by the official Zapier app. Tokens are scoped to a single organization and a set of [scopes](/reference/scopes), and expire **1 hour** after issuance. Use the accompanying `refresh_token` to mint a new access token without re‑prompting the user.
 
 There are two ways to obtain a Bearer token:
 
@@ -22,58 +24,61 @@ When a user connects your Zap to WundertreOS, Zapier handles the OAuth dance for
 
 ### b. Direct OAuth flow
 
-If you're building your own integration, run a standard OAuth 2.0 authorization‑code flow:
+If you're building your own integration, run a standard OAuth 2.0 authorization‑code flow (PKCE S256 supported and recommended for public clients):
 
 1. Redirect the user to `GET /oauth-authorize` ([reference](/oauth/authorize))
-2. The user approves the requested scopes
-3. WundertreOS redirects back to your `redirect_uri` with a `code`
+2. The user picks an organization and approves the requested scopes
+3. WundertreOS redirects back to your `redirect_uri` with a `code` and your `state`
 4. Exchange the code for tokens at `POST /oauth-token` ([reference](/oauth/token))
-
-You'll receive an `access_token` (valid 1 hour) and a `refresh_token`. Use the refresh token to mint new access tokens without prompting the user again.
 
 ### Example request
 
 ```bash
 curl -X GET \
   'https://api.wundertreos.com/functions/v1/api-contacts?limit=10' \
-  -H 'Authorization: Bearer YOUR_ACCESS_TOKEN'
+  -H 'Authorization: Bearer 8f3c2a1d9e7b4f6a5c2d1e0f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b'
 ```
 
 ## 2. API keys
 
-API keys are long‑lived, workspace‑scoped credentials issued from the WundertreOS dashboard. They start with the prefix `wt_` followed by a random suffix:
-
-```text
-wt_live_1a2b3c4d5e6f7g8h9i0j
-```
+API keys are long‑lived, organization‑scoped credentials issued from the WundertreOS dashboard under **Settings → Developer → API keys**. The raw key is an opaque random string; the dashboard shows it once and stores only its hash.
 
 Pass the key in the `X-API-Key` header:
 
 ```bash
 curl -X GET \
   'https://api.wundertreos.com/functions/v1/api-contacts?limit=10' \
-  -H 'X-API-Key: wt_live_1a2b3c4d5e6f7g8h9i0j'
+  -H 'X-API-Key: YOUR_API_KEY'
 ```
 
+Each call updates the key's `last_used_at` timestamp so you can audit activity from the dashboard.
+
 <Callout type="warn" title="Treat API keys like passwords">
-Never commit keys to source control or ship them in client‑side code. Use server‑side env vars and rotate keys from the dashboard if you suspect exposure.
+Never commit keys to source control or ship them in client‑side code. Use server‑side env vars and revoke keys from the dashboard if you suspect exposure.
 </Callout>
 
 ## Choosing a method
 
 - **Distributing to many users?** Use OAuth.
-- **One workspace, one integration, one server?** Use an API key.
+- **One organization, one integration, one server?** Use an API key.
 - **Both work simultaneously** — pick per integration.
 
 ## Errors
 
-If authentication fails you'll receive:
+If authentication fails you'll receive HTTP `401` with:
 
 ```json
 {
   "error": "unauthorized",
-  "message": "Invalid or expired credentials"
+  "message": "Invalid or unknown access token."
 }
 ```
 
-with HTTP status `401`.
+Missing or insufficient scope returns HTTP `403`:
+
+```json
+{
+  "error": "forbidden",
+  "message": "Scope 'contacts:write' is required."
+}
+```

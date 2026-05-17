@@ -1,30 +1,38 @@
 export const meta = {
   title: "Create contact",
-  description: "Create a new contact in the workspace.",
+  description: "Create a new contact in your organization.",
 };
 
 <MethodBadge method="POST" path="/api-contacts" />
 
-Requires the `contacts:write` scope.
+Requires the `contacts:write` scope. Returns `201 Created` with the new contact.
 
 ## Request body
 
-<ParamTable rows={[
-  { name: "email", type: "string", description: "Primary email. Either email or phone is required." },
-  { name: "phone", type: "string", description: "E.164 phone number. Either email or phone is required." },
-  { name: "first_name", type: "string", description: "Given name." },
-  { name: "last_name", type: "string", description: "Family name." },
-  { name: "company", type: "string", description: "Company name." },
-  { name: "title", type: "string", description: "Job title." },
-  { name: "tags", type: "string[]", description: "Tags to apply on creation." },
-  { name: "lifecycle_stage", type: "string", description: "One of lead, mql, sql, customer, evangelist." },
-  { name: "owner_id", type: "string", description: "WundertreOS user ID to assign as owner." },
-  { name: "custom_fields", type: "object", description: "Key/value map of custom field values." },
-]} title="Body" />
+Only `first_name` is required. Unspecified fields default to `null`, except `tags` (`[]`), `status` (`"active"`), and `source` (`"api"`). Any unknown fields are ignored.
 
-<Callout type="info">
-At least one of <code>email</code> or <code>phone</code> is required. If a contact with the same email already exists you'll get <code>409 conflict</code>.
-</Callout>
+<ParamTable rows={[
+  { name: "first_name", type: "string", required: true, description: "Given name." },
+  { name: "last_name", type: "string", description: "Family name. Stored as empty string if omitted." },
+  { name: "email", type: "string", description: "Primary email." },
+  { name: "phone", type: "string", description: "Phone number." },
+  { name: "company", type: "string", description: "Free‑text company name." },
+  { name: "company_id", type: "uuid", description: "Link to an existing company record." },
+  { name: "job_title", type: "string", description: "Job title." },
+  { name: "industry", type: "string" },
+  { name: "address_line1", type: "string" },
+  { name: "address_line2", type: "string" },
+  { name: "city", type: "string" },
+  { name: "state", type: "string" },
+  { name: "zip", type: "string" },
+  { name: "country", type: "string" },
+  { name: "tags", type: "string[]", description: "Tags to apply on creation. Defaults to []." },
+  { name: "status", type: "string", description: "Lifecycle status. Defaults to active." },
+  { name: "stage", type: "string", description: "Pipeline stage label." },
+  { name: "source", type: "string", description: "Where the contact came from. Defaults to api." },
+  { name: "notes", type: "string" },
+  { name: "linkedin_url", type: "string" },
+]} title="Body" />
 
 ## Example request
 
@@ -34,31 +42,40 @@ curl -X POST \
   -H 'Authorization: Bearer YOUR_ACCESS_TOKEN' \
   -H 'Content-Type: application/json' \
   -d '{
-    "email": "jane@example.com",
     "first_name": "Jane",
     "last_name": "Doe",
+    "email": "jane@example.com",
     "company": "Acme Inc",
-    "tags": ["lead"],
-    "lifecycle_stage": "lead"
+    "job_title": "Head of Growth",
+    "tags": ["lead"]
   }'
 ```
 
 ## Response
 
-Returns `201 Created` with the new contact object:
-
 ```json
 {
   "data": {
     "id": "c8b1f3a0-4d2e-4f9a-9b1c-2d4e5f6a7b8c",
-    "email": "jane@example.com",
+    "org_id": "a1b2c3d4-1111-2222-3333-444455556666",
     "first_name": "Jane",
     "last_name": "Doe",
+    "email": "jane@example.com",
     "company": "Acme Inc",
+    "job_title": "Head of Growth",
     "tags": ["lead"],
-    "lifecycle_stage": "lead",
+    "status": "active",
+    "source": "api",
     "created_at": "2026-05-17T14:00:00Z",
     "updated_at": "2026-05-17T14:00:00Z"
   }
 }
 ```
+
+## Errors
+
+| Status | `error` | When |
+| --- | --- | --- |
+| 400 | `invalid_request` | `first_name` is missing, or the body is not valid JSON. |
+| 403 | `forbidden` | The credential lacks the `contacts:write` scope. |
+| 500 | `server_error` | Database write failed. |

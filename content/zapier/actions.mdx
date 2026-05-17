@@ -1,71 +1,38 @@
 export const meta = {
   title: "Zapier actions",
-  description: "Things your Zap can do in WundertreOS.",
+  description: "Every WundertreOS action and the underlying API endpoint that powers it.",
 };
 
-Actions let your Zap **write** to WundertreOS. Each maps to a documented REST endpoint.
+Each action is a single API call. Fields shown in the Zap editor map 1:1 to the request body documented in the API reference.
 
-## Create Contact
+## Contact actions
 
-Creates a new contact. Maps to [`POST /api-contacts`](/contacts/create).
+### Create Contact
 
-**Fields** (Zapier UI):
-- Email (required if no phone)
-- Phone (required if no email)
-- First name, Last name
-- Company, Title
-- Tags (comma‑separated)
-- Lifecycle stage (dropdown: lead, mql, sql, customer, evangelist)
-- Owner (dropdown of workspace users)
-- Custom fields (key/value pairs)
+`POST /api-contacts` — see [Create contact](/contacts/create).
 
-Returns the new contact object so downstream steps can reference the new `id`.
+Only `first_name` is required. Defaults: `status="active"`, `source="api"`, `tags=[]`. Returns `201` with the new record.
 
-## Update Contact
+### Update Contact
 
-Updates fields on an existing contact. Maps to [`PATCH /api-contacts/:id`](/contacts/update).
+`PATCH /api-contacts/:id` — see [Update contact](/contacts/update).
 
-**Fields**:
-- Contact ID (required) — usually mapped from a previous step
-- Any of: email, phone, first/last name, company, title, lifecycle stage, owner
-- Add tags / Remove tags (mutate without replacing the full list)
-- Custom fields
+Only fields you populate in the Zap are sent in the body. Updatable: `first_name`, `last_name`, `email`, `phone`, `company`, `company_id`, `job_title`, `industry`, `address_line1`, `address_line2`, `city`, `state`, `zip`, `country`, `tags`, `status`, `stage`, `source`, `notes`, `linkedin_url`, `score`.
 
-## Find Contact
+### Delete Contact
 
-Looks up a contact without modifying anything. Maps to [`POST /api-contacts-search`](/contacts/search).
+`DELETE /api-contacts/:id` — see [Delete contact](/contacts/delete).
 
-**Search by** one or more of:
-- Email
-- Phone
-- Name (fuzzy)
-- Tags (must have all)
+### Find Contact
 
-**"Should this step create a new contact if none is found?"** is supported — when checked and no match is found, the action falls back to Create Contact.
+`POST /api-contacts-search` — see [Search contacts](/contacts/search).
 
-## Add Tag to Contact
+Search by `email`, `phone`, `first_name`, `last_name`, or `tags` (contact must contain ALL tags). Returns up to `limit` matches (default 10, max 50). Use Zapier's **"Create WundertreOS contact if it doesn't exist yet"** toggle to chain straight into a Create Contact step.
 
-Appends one or more tags to an existing contact. Convenience wrapper around `PATCH /api-contacts/:id` with `add_tags`.
+<Callout type="info" title="Deals and activities are read‑only over the public API">
+The current public API exposes deals and activities as read‑only endpoints (<code>GET /api-deals</code>, <code>GET /api-deals/:contact_id</code>, <code>GET /api-activities</code>). They power Zapier triggers and search steps but cannot be created or updated via Zapier actions yet. Create deals and log activities from inside WundertreOS, then trigger downstream Zaps via <a href="/zapier/triggers">deal.created / deal.updated</a> events.
+</Callout>
 
-**Fields**:
-- Contact ID (required)
-- Tags to add (comma‑separated)
-
-## Create Deal
-
-Creates a deal in the pipeline.
-
-**Fields**:
-- Title (required)
-- Value, Currency (defaults to workspace currency)
-- Stage (dropdown)
-- Linked contact (required — usually a contact ID from a previous step)
-- Owner
-- Expected close date
-- Probability (0–100)
-
-Returns the new deal object.
-
-<Callout type="info" title="Building a typical sales Zap">
-A common pattern: <strong>Stripe → New Customer</strong> → <strong>WundertreOS → Find Contact</strong> (by email, create if missing) → <strong>WundertreOS → Add Tag</strong> (<code>customer</code>) → <strong>WundertreOS → Create Deal</strong> (stage <code>won</code>, value from Stripe).
+<Callout type="tip" title="Idempotent Find + Create">
+Use **Find Contact** with the "Create if not found" toggle when ingesting leads from any other Zapier app. WundertreOS will return the existing contact when there's a match (by email or tags) and create a new one otherwise — no duplicates.
 </Callout>

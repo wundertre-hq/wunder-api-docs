@@ -1,11 +1,11 @@
 export const meta = {
   title: "List webhook subscriptions",
-  description: "List active webhook subscriptions for the current credential.",
+  description: "List webhook subscriptions belonging to your organization.",
 };
 
 <MethodBadge method="GET" path="/api-webhook-subscriptions" />
 
-Requires the `webhooks:read` scope.
+Requires the `webhooks:read` scope. Returns all subscriptions for the caller's organization, sorted by `created_at` descending.
 
 ## Example request
 
@@ -21,14 +21,21 @@ curl -X GET \
 {
   "data": [
     {
-      "id": "wh_a1b2c3",
-      "target_url": "https://hooks.zapier.com/hooks/catch/123/abc/",
-      "event_types": ["contact.created", "contact.updated"],
-      "description": "Zapier — New Contact trigger",
-      "signing_secret": "whsec_...",
-      "active": true,
-      "created_at": "2026-04-01T08:00:00Z"
+      "id": "a1b2c3d4-1111-2222-3333-444455556666",
+      "target_url": "https://example.com/wundertre/webhook",
+      "event_types": ["contact.created", "contact.tag_added"],
+      "enabled": true,
+      "description": "Sync new leads to internal CRM",
+      "created_at": "2026-05-17T14:30:00Z"
     }
   ]
 }
 ```
+
+Note: the `secret` field is **not** returned by list or get — it is only shown once on creation. See [Create webhook subscription](/webhooks/create).
+
+## Get a single subscription
+
+<MethodBadge method="GET" path="/api-webhook-subscriptions/:id" />
+
+Returns the same fields as the list entry. `404 not_found` if the subscription does not belong to your organization.

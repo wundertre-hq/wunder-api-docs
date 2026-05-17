@@ -5,17 +5,17 @@ export const meta = {
 
 <MethodBadge method="POST" path="/oauth-revoke" />
 
-Use this when a user disconnects your integration. Revoking a refresh token invalidates every access token issued from it.
+Use this when a user disconnects your integration. Implements [RFC 7009](https://datatracker.ietf.org/doc/html/rfc7009) — the endpoint always returns `200` with an empty JSON body, even for unknown tokens, to avoid leaking information.
+
+Accepts either `application/x-www-form-urlencoded` or `application/json`.
 
 ## Request body
 
-`application/x-www-form-urlencoded`:
-
 <ParamTable rows={[
   { name: "token", type: "string", required: true, description: "The access_token or refresh_token to revoke." },
-  { name: "token_type_hint", type: "string", description: "`access_token` or `refresh_token` (optional hint for faster lookup)." },
-  { name: "client_id", type: "string", required: true, description: "Your OAuth client ID." },
-  { name: "client_secret", type: "string", description: "Required for confidential clients." },
+  { name: "token_type_hint", type: "string", description: "`access_token` or `refresh_token` — optional hint to narrow which table is checked first." },
+  { name: "client_id", type: "string", description: "Your OAuth client ID. Required for confidential clients." },
+  { name: "client_secret", type: "string", description: "Your OAuth client secret. Required for confidential clients." },
 ]} title="Body" />
 
 ## Example
@@ -23,11 +23,12 @@ Use this when a user disconnects your integration. Revoking a refresh token inva
 ```bash
 curl -X POST 'https://api.wundertreos.com/functions/v1/oauth-revoke' \
   -H 'Content-Type: application/x-www-form-urlencoded' \
-  -d 'token=rt_1d3e5c7f9a1d3e5c' \
+  -d 'token=1d3e5c7f9a1d3e5c7f9a1d3e5c7f9a1d' \
   -d 'token_type_hint=refresh_token' \
-  -d 'client_id=your_client'
+  -d 'client_id=your_client' \
+  -d 'client_secret=your_secret'
 ```
 
 ## Response
 
-Returns `200 OK` with an empty body on success. The endpoint also returns `200` for invalid tokens (per RFC 7009) to avoid leaking information.
+`200 OK` with body `{}`. Returns `401 invalid_client` only if client credentials are provided but incorrect.

@@ -1,25 +1,24 @@
 export const meta = {
   title: "Search contacts",
-  description: "Find contacts by email, name, phone number, or tags.",
+  description: "Find contacts by email, phone, name, or tags.",
 };
 
 <MethodBadge method="POST" path="/api-contacts-search" />
 
-Used by Zapier's **Find Contact** action and any custom lookup flow. Returns up to 25 best matches ranked by relevance.
+Requires the `contacts:read` scope. Powers the Zapier "Find Contact" action.
+
+At least one of `email`, `phone`, `first_name`, `last_name`, or `tags` must be provided.
 
 ## Request body
 
 <ParamTable rows={[
-  { name: "email", type: "string", description: "Exact email match (case‑insensitive)." },
-  { name: "phone", type: "string", description: "E.164 phone match." },
-  { name: "name", type: "string", description: "Fuzzy match against first_name + last_name + company." },
-  { name: "tags", type: "string[]", description: "Return only contacts that have ALL of these tags." },
-  { name: "limit", type: "integer", description: "Default 10, max 25." },
+  { name: "email", type: "string", description: "Case‑insensitive exact match on email." },
+  { name: "phone", type: "string", description: "Exact match on phone." },
+  { name: "first_name", type: "string", description: "Case‑insensitive partial match (substring)." },
+  { name: "last_name", type: "string", description: "Case‑insensitive partial match (substring)." },
+  { name: "tags", type: "string[]", description: "Contact must contain ALL provided tags." },
+  { name: "limit", type: "integer", description: "Default 10, max 50." },
 ]} title="Body" />
-
-<Callout type="tip">
-Provide at least one of <code>email</code>, <code>phone</code>, <code>name</code>, or <code>tags</code>.
-</Callout>
 
 ## Example request
 
@@ -31,6 +30,16 @@ curl -X POST \
   -d '{ "email": "jane@example.com" }'
 ```
 
+Find every VIP customer:
+
+```bash
+curl -X POST \
+  'https://api.wundertreos.com/functions/v1/api-contacts-search' \
+  -H 'X-API-Key: YOUR_API_KEY' \
+  -H 'Content-Type: application/json' \
+  -d '{ "tags": ["vip", "customer"], "limit": 50 }'
+```
+
 ## Response
 
 ```json
@@ -38,11 +47,23 @@ curl -X POST \
   "data": [
     {
       "id": "c8b1f3a0-4d2e-4f9a-9b1c-2d4e5f6a7b8c",
-      "email": "jane@example.com",
       "first_name": "Jane",
       "last_name": "Doe",
-      "match_score": 1.0
+      "email": "jane@example.com",
+      "tags": ["lead", "vip"],
+      "status": "active",
+      "created_at": "2026-04-12T09:31:22Z",
+      "updated_at": "2026-05-17T11:02:08Z"
     }
   ]
 }
 ```
+
+Each result has the same shape as [Get contact](/contacts/get) (minus `created_by`).
+
+## Errors
+
+| Status | `error` | When |
+| --- | --- | --- |
+| 400 | `invalid_request` | No search field provided, or body is not valid JSON. |
+| 403 | `forbidden` | Credential lacks `contacts:read`. |

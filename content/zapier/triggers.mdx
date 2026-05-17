@@ -1,59 +1,33 @@
 export const meta = {
   title: "Zapier triggers",
-  description: "Events in WundertreOS that can kick off a Zap.",
+  description: "Every WundertreOS trigger and the underlying API endpoint that powers it.",
 };
 
-Triggers fire your Zap whenever something happens in WundertreOS. Each trigger maps to a [webhook event type](/webhooks/events) under the hood.
+Each Zapier trigger maps directly to a public API call. Real‑time triggers create a [webhook subscription](/webhooks/create) on enable and delete it on disable; polling triggers run a `GET` every few minutes filtered by `updated_since` / `created_since`.
 
-## New Contact
+## Contact triggers
 
-Fires when a new contact is created — manually, via import, via API, or via another Zap.
+<SchemaTable title="Contact triggers" rows={[
+  { name: "New Contact", type: "Real‑time (REST Hook)", description: "Fires on contact.created. Subscribes via POST /api-webhook-subscriptions with event_types: [contact.created]. Falls back to GET /api-contacts?event=created&updated_since=… if hooks are unavailable." },
+  { name: "Updated Contact", type: "Real‑time (REST Hook)", description: "Fires on contact.updated. Polling fallback: GET /api-contacts?updated_since=…&order=desc." },
+  { name: "Tag Added to Contact", type: "Real‑time (REST Hook)", description: "Fires on contact.tag_added. Use this — not Updated Contact — when you want a Zap that runs only on tag changes. Polling fallback: GET /api-contacts?event=tag_added&updated_since=…." },
+  { name: "Contact Enriched", type: "Real‑time (REST Hook)", description: "Fires on contact.enriched. Polling fallback: GET /api-contacts?event=enriched&updated_since=…." },
+  { name: "Note Added to Contact", type: "Real‑time (REST Hook)", description: "Fires on contact.note_added. Polling fallback: GET /api-activities?type=note&created_since=…." },
+]} />
 
-- **Event type**: `contact.created`
-- **Sample fields**: `id`, `email`, `first_name`, `last_name`, `phone`, `company`, `tags`, `lifecycle_stage`, `created_at`
+## Deal triggers
 
-Common uses: add new leads to a Google Sheet, post to a Slack channel, send a welcome email.
+<SchemaTable title="Deal triggers" rows={[
+  { name: "New Deal", type: "Real‑time (REST Hook)", description: "Fires on deal.created. Polling fallback: GET /api-deals?created_since=…&order=desc." },
+  { name: "Updated Deal", type: "Real‑time (REST Hook)", description: "Fires on deal.updated, including stage transitions. Polling fallback: GET /api-deals?updated_since=…&order=desc." },
+]} />
 
-## Contact Updated
+## Activity trigger
 
-Fires when any field on an existing contact changes.
+<SchemaTable title="Activity trigger" rows={[
+  { name: "New Activity", type: "Polling", description: "GET /api-activities?created_since=…&type=<optional>. Filter by activity type (note, email, call, meeting, tag_added, enrichment) in the Zap step." },
+]} />
 
-- **Event type**: `contact.updated`
-- **Sample fields**: full contact + a `changes` object listing the fields that changed
-
-<Callout type="tip">
-To avoid noisy Zaps, add a Zapier **Filter** step that only continues when a specific field (e.g. <code>lifecycle_stage</code>) changes.
+<Callout type="info" title="Hook lifecycle">
+When you turn a Zap on, Zapier calls <code>POST /api-webhook-subscriptions</code> with its hook URL and the matching <code>event_types</code>. When the Zap is turned off or deleted, Zapier calls <code>DELETE /api-webhook-subscriptions/:id</code>. Every delivery is signed — see <a href="/webhooks/signature">Verify signatures</a>.
 </Callout>
-
-## Tag Added to Contact
-
-Fires when one or more tags are added to a contact.
-
-- **Event type**: `contact.tag_added`
-- **Optional filter**: limit to a specific tag (e.g. `vip`)
-- **Sample fields**: contact + `added_tags`
-
-Great for tag‑driven automations like "when tagged `vip`, alert the account team".
-
-## Contact Enriched
-
-Fires when WundertreOS's enrichment service adds new data (company, job title, LinkedIn, technographics) to a contact.
-
-- **Event type**: `contact.enriched`
-- **Sample fields**: contact + `enriched_fields` (list of fields that gained values)
-
-## Note Added to Contact
-
-Fires when a note is added to a contact's timeline.
-
-- **Event type**: `contact.note_added`
-- **Sample fields**: `contact_id`, `actor_id`, `body`, `created_at`
-
-## New Deal
-
-Fires when a new deal is created.
-
-- **Event type**: `deal.created`
-- **Sample fields**: `id`, `title`, `value`, `currency`, `stage`, `contact_id`, `owner_id`, `expected_close_date`
-
-You can also catch **deal stage changes** by using the **Contact Updated** trigger plus a filter on `stage` if you want a single Zap per pipeline movement.
