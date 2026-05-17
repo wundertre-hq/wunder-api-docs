@@ -17,7 +17,7 @@ Redirect the user's browser to this endpoint to begin the OAuth flow. WundertreO
   { name: "client_id", type: "string", required: true, description: "Your OAuth client ID (from the WundertreOS developer dashboard)." },
   { name: "redirect_uri", type: "string", required: true, description: "Must exactly match a redirect URI registered with your client." },
   { name: "response_type", type: "string", required: true, description: "Must be `code`. Any other value returns `unsupported_response_type`." },
-  { name: "scope", type: "string", required: true, description: "Space‑separated list of scopes (e.g. `contacts:read contacts:write`). Defaults to `contacts:read` if omitted. Every requested scope must be in your client's `allowed_scopes`." },
+  { name: "scope", type: "string", description: "Space‑separated list of scopes (e.g. `contacts:read contacts:write`). Optional — defaults to `contacts:read` if omitted. Every requested scope must be in your client's `allowed_scopes`." },
   { name: "state", type: "string", description: "Opaque value echoed back to your redirect URI. Use it to prevent CSRF — strongly recommended." },
   { name: "code_challenge", type: "string", description: "PKCE challenge (recommended for public clients)." },
   { name: "code_challenge_method", type: "string", description: "If using PKCE, must be `S256`. `plain` is not supported." },
