@@ -11,6 +11,7 @@ import { Menu } from "lucide-react";
 import { MDXProvider } from "@mdx-js/react";
 
 import appCss from "../styles.css?url";
+import logo from "@/assets/wundertre-os-logo-white.png";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { mdxComponents } from "@/components/docs/mdx-components";
@@ -97,7 +98,7 @@ function RootComponent() {
           {/* Mobile top bar */}
           <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-border bg-background/80 px-4 backdrop-blur lg:hidden">
             <div className="flex items-center gap-2">
-              <img src={(new URL('../assets/wundertre-os-logo-white.png', import.meta.url)).href} alt="WundertreOS" className="h-6 w-auto" />
+              <img src={logo} alt="WundertreOS" className="h-6 w-auto" />
             </div>
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetTrigger asChild>
