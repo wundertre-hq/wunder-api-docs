@@ -1,0 +1,55 @@
+export const meta = {
+  title: "MCP server overview",
+  description: "Connect AI agents to WundertreOS over the Model Context Protocol.",
+};
+
+WundertreOS ships a first-class **MCP (Model Context Protocol) server**, so AI agents — Claude, ChatGPT, Claude Code, or anything else that speaks MCP — can operate your workspace directly: look up contacts, move deals, schedule social posts, pull ad performance, build workflows, and much more.
+
+While the REST API covers contacts, deals, activities, and webhooks, the MCP server exposes the **full WundertreOS tool registry — 200+ tools** spanning CRM, prospecting, social, ads, email/SMS marketing, content generation, websites and landing pages, support, analytics, workflows, and business knowledge. These are the same tools that power Wunder, the in-app agent, so agent capabilities stay identical inside and outside the product.
+
+## Endpoints
+
+| Use case | URL |
+| --- | --- |
+| OAuth clients (claude.ai, ChatGPT, Claude Code) | `https://os.wundertre.com/mcp` |
+| API-key clients (scripts, header-capable MCP clients) | `https://api.wundertreos.com/functions/v1/api-mcp` |
+
+The `os.wundertre.com/mcp` URL fronts the same server and additionally serves the OAuth discovery metadata MCP hosts need (`/.well-known/oauth-authorization-server`, `/.well-known/oauth-protected-resource`), so hosts can bootstrap the entire auth flow from that one URL.
+
+## Transport & protocol
+
+- **Streamable HTTP in stateless JSON mode** — every call is a self-contained `POST`; no session to manage.
+- Protocol versions `2025-06-18`, `2025-03-26`, and `2024-11-05` are accepted.
+- Supported methods: `initialize`, `ping`, `tools/list`, `tools/call`.
+
+## Authentication & scopes
+
+The MCP server uses the **same credentials as the REST API**:
+
+- `Authorization: Bearer <OAuth access token>` — issued via the standard [OAuth flow](/oauth/authorize) (what claude.ai and ChatGPT use, via automatic [dynamic client registration](/mcp/connect)).
+- `Authorization: Bearer <API key>` or `X-API-Key: <key>` — from **Settings → Integrations & API**.
+
+Every tool is mapped to a [scope family](/reference/scopes). `tools/list` returns only the tools your credential's scopes allow, and the scope is re-checked on every `tools/call` — a narrowly scoped connection simply never sees tools it can't use.
+
+## Read-only vs. action tools
+
+Tools are annotated so MCP hosts can show the right approval UX:
+
+- **Read tools** (`readOnlyHint: true`) are safe to call freely.
+- **Action tools** create, update, send, or delete real data. They take effect immediately — the approval step belongs to the MCP host (e.g. Claude asks you before running them).
+- **Destructive tools** (deletes, cancellations) additionally carry `destructiveHint: true`.
+
+Every action call is recorded in your organization's **audit log** with the tool name and arguments, attributed to "External agent (MCP)" — so there is always a trail of what an agent changed.
+
+<Callout type="warn" title="Agents act with your credential's permissions">
+A full-grant API key lets a connected agent do everything the key allows, without per-call server-side confirmation. Scope credentials to what the agent actually needs, and revoke them from <strong>Settings → Integrations &amp; API</strong> if anything looks wrong.
+</Callout>
+
+## Rate limits & response size
+
+MCP calls share the org's [rate limit](/rate-limits) (60 requests / 60 seconds) with the REST API — a busy agent conversation and your Zapier polling draw from the same bucket. Tool results are returned as text (plus structured JSON where available) and truncated at 100,000 characters.
+
+## What's next
+
+- [Connect an AI agent](/mcp/connect) — claude.ai, Claude Code, ChatGPT, and API-key clients
+- [Scopes](/reference/scopes) — the permission families that gate tools
