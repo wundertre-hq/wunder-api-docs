@@ -1,34 +1,68 @@
 export const meta = {
   title: "Scopes",
-  description: "Permissions you can request during the OAuth flow.",
+  description: "The permission families that gate the REST API and MCP tools.",
 };
 
-When you start the OAuth flow at [`/oauth-authorize`](/oauth/authorize), pass a space‑separated list of scopes. Request the **minimum** scopes your integration needs. The same scope strings apply to API keys (configured when you create the key in the dashboard).
+Scopes follow a **family model**: `<family>:read` or `<family>:write`, where **write implies read** within the same family. Request the **minimum** scopes your integration needs — during the OAuth flow (space-separated `scope` parameter on [`/oauth-authorize`](/oauth/authorize)) or when creating an API key in the dashboard.
 
-<SchemaTable title="Available scopes" rows={[
-  { name: "contacts:read", type: "scope", description: "Read contacts, deals, activities, and search. Required by GET /api-deals, GET /api-activities, and POST /api-contacts-search. GET /api-contacts and its sub-resources (/:id, /:id/deals, /:id/activities) only require a valid credential — no explicit scope check." },
-  { name: "contacts:write", type: "scope", description: "Create, update, and delete contacts. Required by POST /api-contacts, PATCH /api-contacts/:id, and DELETE /api-contacts/:id." },
-  { name: "webhooks:read", type: "scope", description: "Required by every /api-webhook-subscriptions request — including POST and DELETE, which additionally require webhooks:write. Covers GET /api-webhook-subscriptions and GET /api-webhook-subscriptions/:id on its own." },
-  { name: "webhooks:write", type: "scope", description: "Required in addition to webhooks:read for POST /api-webhook-subscriptions and DELETE /api-webhook-subscriptions/:id. webhooks:write alone is not sufficient — the endpoint checks webhooks:read first." },
+## Scope families
+
+<SchemaTable title="Families (each has :read and :write)" rows={[
+  { name: "crm", type: "family", description: "Contacts, companies, deals, pipelines, tasks, bookings, documents, products, calls. Gates the REST contacts/deals/activities endpoints and the CRM MCP tools." },
+  { name: "prospecting", type: "family", description: "Prospect lists and lead analysis." },
+  { name: "social", type: "family", description: "Social accounts, posts, scheduling, inbox, comments." },
+  { name: "ads", type: "family", description: "Ad campaigns, performance, Local Services leads." },
+  { name: "marketing", type: "family", description: "Email/SMS campaigns, funnels, marketing plans, SEO & competitive research." },
+  { name: "content", type: "family", description: "AI copy, image, and media generation." },
+  { name: "web", type: "family", description: "Websites, landing pages, forms, chatbots, quotes." },
+  { name: "support", type: "family", description: "Tickets, CSAT, memberships, referrals, knowledge base." },
+  { name: "insights", type: "family", description: "Reports, web analytics, attribution, audit log." },
+  { name: "workflows", type: "family", description: "Automation workflows and enrollments." },
+  { name: "knowledge", type: "family", description: "Business profile, personas, competitors, goals." },
+  { name: "webhooks", type: "family", description: "Webhook subscriptions (REST Hooks)." },
 ]} />
+
+Today the REST API surfaces the `crm` and `webhooks` families; the other families gate [MCP tools](/mcp/overview). As REST endpoints expand into those domains they will use the same scope strings.
+
+## What each REST endpoint requires
+
+<SchemaTable title="REST scope requirements" rows={[
+  { name: "crm:read", type: "scope", description: "GET /api-deals, GET /api-activities, POST /api-contacts-search. GET /api-contacts and its sub-resources (/:id, /:id/deals, /:id/activities) only require a valid credential — no explicit scope check." },
+  { name: "crm:write", type: "scope", description: "POST /api-contacts, PATCH /api-contacts/:id, DELETE /api-contacts/:id. Implies crm:read." },
+  { name: "webhooks:read", type: "scope", description: "GET /api-webhook-subscriptions and GET /api-webhook-subscriptions/:id." },
+  { name: "webhooks:write", type: "scope", description: "POST /api-webhook-subscriptions and DELETE /api-webhook-subscriptions/:id. Implies webhooks:read." },
+]} />
+
+On the MCP server, every tool is mapped to one family scope: `tools/list` shows only tools your credential satisfies, and the scope is re-checked on every `tools/call`.
+
+## Legacy scopes
+
+The original scope strings predate the family model. They keep working — each maps onto its family, so **existing Zapier connections and API keys are unaffected**:
+
+<SchemaTable title="Legacy aliases" rows={[
+  { name: "contacts:read", type: "legacy", description: "Satisfies crm:read." },
+  { name: "contacts:write", type: "legacy", description: "Satisfies crm:write (and therefore crm:read)." },
+]} />
+
+New integrations should request the family scopes; error messages name the family scope (e.g. `crm:write`) even when your credential holds the legacy alias.
 
 ## Example
 
 ```text
-scope=contacts:read%20contacts:write%20webhooks:write
+scope=crm:read%20crm:write%20webhooks:write
 ```
 
 <Callout type="tip">
-A Zapier‑style integration that lists contacts, creates contacts, and subscribes to triggers typically needs <code>contacts:read contacts:write webhooks:read webhooks:write</code>.
+A Zapier-style integration that lists contacts, creates contacts, and subscribes to triggers needs <code>crm:read crm:write webhooks:write</code> (write implies read, so <code>webhooks:read</code> comes along automatically).
 </Callout>
 
 ## Scope errors
 
-Calling an endpoint without the required scope returns HTTP `403`:
+Calling an endpoint without a satisfying scope returns HTTP `403`:
 
 ```json
 {
   "error": "forbidden",
-  "message": "Scope 'contacts:write' is required."
+  "message": "crm:write scope is required."
 }
 ```

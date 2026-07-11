@@ -71,6 +71,8 @@ Never commit keys to source control or ship them in client‑side code. Use serv
 - **One organization, one integration, one server?** Use an API key.
 - **Both work simultaneously** — pick per integration.
 
+Both credential types also authenticate the [MCP server](/mcp/overview) — the same key or token works for REST calls and agent tool calls.
+
 ## Errors
 
 If authentication fails you'll receive HTTP `401` with:
@@ -87,6 +89,6 @@ Missing or insufficient scope returns HTTP `403`:
 ```json
 {
   "error": "forbidden",
-  "message": "Scope 'contacts:write' is required."
+  "message": "Scope 'crm:write' is required."
 }
 ```

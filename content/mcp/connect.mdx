@@ -1,0 +1,64 @@
+export const meta = {
+  title: "Connect an AI agent",
+  description: "Step-by-step setup for claude.ai, Claude Code, ChatGPT, and API-key MCP clients.",
+};
+
+Any MCP-capable host can connect to WundertreOS. OAuth hosts (claude.ai, ChatGPT) need zero manual configuration — discovery and client registration happen automatically, and you approve the connection on the WundertreOS consent screen. Header-capable clients can skip OAuth entirely with an API key.
+
+## claude.ai / Claude Desktop
+
+1. Go to **Settings → Connectors → Add custom connector**.
+2. Enter the connector URL:
+
+```text
+https://os.wundertre.com/mcp
+```
+
+3. Claude discovers the OAuth server, registers itself, and opens the WundertreOS consent screen.
+4. Sign in, **pick the organization** the agent should work in, review the requested scopes, and approve.
+
+That's it — Claude can now list and call WundertreOS tools, asking you for confirmation before running action tools.
+
+## Claude Code
+
+With OAuth (recommended — same consent flow as above):
+
+```bash
+claude mcp add --transport http wundertre https://os.wundertre.com/mcp
+```
+
+Or with an API key from **Settings → Integrations & API**, no browser flow needed:
+
+```bash
+claude mcp add --transport http wundertre \
+  https://api.wundertreos.com/functions/v1/api-mcp \
+  --header "X-API-Key: YOUR_API_KEY"
+```
+
+## ChatGPT
+
+Add WundertreOS as a connector (Settings → Connectors in ChatGPT, developer mode) with the same URL:
+
+```text
+https://os.wundertre.com/mcp
+```
+
+ChatGPT registers via dynamic client registration and runs the same consent flow.
+
+## Any other MCP client
+
+- **Supports OAuth?** Point it at `https://os.wundertre.com/mcp`. The server advertises RFC 8414 / RFC 9728 metadata at `/.well-known/oauth-authorization-server` and `/.well-known/oauth-protected-resource`, and accepts RFC 7591 dynamic client registration — your client can onboard itself without any pre-shared configuration.
+- **Supports custom headers?** Use `https://api.wundertreos.com/functions/v1/api-mcp` with `X-API-Key` (or `Authorization: Bearer <key>`).
+
+<Callout type="info" title="Registration is not access">
+Dynamic client registration only creates a client record. A registered client can't touch any data until a WundertreOS user signs in and approves it — per organization, per scope — on the consent screen.
+</Callout>
+
+## Verifying the connection
+
+Ask the agent something read-only, e.g. *"List my pipelines and stages"* or *"How many open deals do we have?"*. If the credential is valid you'll get live data; if scopes are missing, the corresponding tools simply won't appear to the agent.
+
+## Disconnecting
+
+- **OAuth connections:** revoke from **WundertreOS → Settings → Integrations & API → Connected Apps** (revokes all access and refresh tokens for that app), or remove the connector on the host side.
+- **API keys:** revoke the key from **Settings → Integrations & API → API Keys**. Revocation is immediate.

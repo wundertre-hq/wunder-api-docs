@@ -63,6 +63,13 @@ export const nav: NavSection[] = [
       { title: "Actions", slug: "zapier/actions" },
     ],
   },
+  {
+    title: "MCP for AI Agents",
+    items: [
+      { title: "Overview", slug: "mcp/overview" },
+      { title: "Connect an agent", slug: "mcp/connect" },
+    ],
+  },
 ];
 
 export const flatNav = nav.flatMap((s) => s.items.map((i) => ({ ...i, section: s.title })));

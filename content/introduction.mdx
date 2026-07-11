@@ -23,7 +23,7 @@ Every endpoint path in this reference is appended to that base, e.g. `GET /api-c
 - **Partners** embedding WundertreOS into their own platforms
 - **Power users** automating workflows via Zapier, Make, or n8n
 
-If you just want point‑and‑click automation, jump straight to the [Zapier Integration Guide](/zapier/overview) — no code required.
+If you just want point‑and‑click automation, jump straight to the [Zapier Integration Guide](/zapier/overview) — no code required. Connecting an AI agent instead? WundertreOS also speaks the **Model Context Protocol** — see the [MCP server overview](/mcp/overview), which exposes far more of the platform than the REST surface below.
 
 ## Conventions
 
@@ -36,7 +36,7 @@ If you just want point‑and‑click automation, jump straight to the [Zapier In
 - Errors return `{ "error": "invalid_request", "message": "..." }` with an appropriate HTTP status.
 
 <Callout type="tip" title="Get an API key in 60 seconds">
-Sign in to your WundertreOS workspace → **Settings → Developer → API keys** to generate a key.
+Sign in to your WundertreOS workspace → **Settings → Integrations & API → API Keys** to generate a key.
 Then head over to [Authentication](/authentication) for example requests.
 </Callout>
 
@@ -46,3 +46,4 @@ Then head over to [Authentication](/authentication) for example requests.
 - [Rate limits & best practices](/rate-limits)
 - [Contacts API](/contacts/list) — the core resource
 - [Webhooks](/webhooks/events) — receive events in real time
+- [MCP for AI agents](/mcp/overview) — connect Claude, ChatGPT, and other agents
