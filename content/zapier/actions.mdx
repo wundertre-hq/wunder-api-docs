@@ -29,9 +29,22 @@ Only fields you populate in the Zap are sent in the body. Updatable: `first_name
 
 Search by `email`, `phone`, `first_name`, `last_name`, or `tags` (contact must contain ALL tags). Returns up to `limit` matches (default 10, max 50). Use Zapier's **"Create WundertreOS contact if it doesn't exist yet"** toggle to chain straight into a Create Contact step.
 
-<Callout type="info" title="Deals and activities are read‑only over the public API">
-The current public API exposes deals and activities as read‑only endpoints (<code>GET /api-deals</code>, <code>GET /api-contacts/:id/deals</code>, <code>GET /api-activities</code>). They power Zapier triggers and search steps but cannot be created or updated via Zapier actions yet. Create deals and log activities from inside WundertreOS, then trigger downstream Zaps via <a href="/zapier/triggers">deal.created / deal.updated</a> events.
-</Callout>
+### Add Tag to Contact
+
+`POST /api-contacts/:id/tags`
+
+Adds/merges tag(s) onto a contact. Idempotent and case‑insensitive — re‑running the Zap won't duplicate tags. Accepts a single tag string or a list of tags, and does **not** replace the contact's existing tag list.
+
+## Deal actions
+
+### Create Deal
+
+`POST /api-deals`
+
+Required: `title`. Optional: `contact_id`, `value`, `pipeline_id`, `stage_id`, plus any other fields exposed in the Zapier action.
+
+If `pipeline_id` / `stage_id` are omitted, the API places the deal in the org's default pipeline and its first stage. In Zapier, pipeline and stage are optional dropdowns populated from `GET /api-pipelines`.
+
 
 <Callout type="tip" title="Idempotent Find + Create">
 Use **Find Contact** with the "Create if not found" toggle when ingesting leads from any other Zapier app. WundertreOS will return the existing contact when there's a match (by email or tags) and create a new one otherwise — no duplicates.
