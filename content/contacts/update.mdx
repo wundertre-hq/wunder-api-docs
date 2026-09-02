@@ -7,7 +7,7 @@ export const meta = {
 
 <TryIt method="PATCH" path="/api-contacts/:id" body={`{
   "tags": ["lead", "qualified"],
-  "stage": "qualified"
+  "status": "qualified"
 }`} />
 
 
@@ -21,7 +21,9 @@ Requires the `contacts:write` scope. Only fields you include are updated; everyt
 
 ## Updatable fields
 
-`first_name`, `last_name`, `email`, `phone`, `company`, `company_id`, `job_title`, `industry`, `address_line1`, `address_line2`, `city`, `state`, `zip`, `country`, `tags`, `status`, `stage`, `source`, `notes`, `linkedin_url`, `score`.
+`first_name`, `last_name`, `email`, `phone`, `company`, `company_id`, `job_title`, `industry`, `address_line1`, `address_line2`, `city`, `state`, `zip`, `country`, `tags`, `status`, `source`, `notes`, `linkedin_url`, `score`.
+
+`status` accepts `new`, `candidate`, `contacted`, `qualified`, `unqualified`, `customer`, or `lost`.
 
 System fields (`id`, `org_id`, `created_at`, `updated_at`, `created_by`, `enriched_at`, `enrichment_status`) cannot be set via this endpoint.
 
@@ -34,7 +36,7 @@ curl -X PATCH \
   -H 'Content-Type: application/json' \
   -d '{
     "tags": ["lead", "qualified"],
-    "stage": "qualified",
+    "status": "qualified",
     "score": 82
   }'
 ```
@@ -44,7 +46,7 @@ curl -X PATCH \
 Returns the updated contact (same shape as [Get contact](/contacts/get)):
 
 ```json
-{ "data": { "id": "c8b1f3a0-…", "tags": ["lead", "qualified"], "stage": "qualified", "score": 82, "updated_at": "2026-05-17T14:05:00Z" } }
+{ "data": { "id": "c8b1f3a0-…", "tags": ["lead", "qualified"], "status": "qualified", "score": 82, "updated_at": "2026-05-17T14:05:00Z" } }
 ```
 
 ## Errors
