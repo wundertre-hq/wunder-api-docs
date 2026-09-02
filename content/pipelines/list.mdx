@@ -1,0 +1,92 @@
+export const meta = {
+  title: "List pipelines",
+  description: "List all pipelines in your organization, each with their stages in board order.",
+};
+
+<MethodBadge method="GET" path="/api-pipelines" />
+
+<TryIt method="GET" path="/api-pipelines" />
+
+
+Requires the `crm:read` scope. Works with both Bearer tokens and API keys (`X-API-Key`). Returns every pipeline in the caller's organization, each nested with its stages sorted by `sort_order`. Exists so integrations never ask a user to type a `pipeline_id` or `stage_id` — Zapier backs its Pipeline / Stage dropdowns with this endpoint.
+
+## Example request
+
+```bash
+curl -X GET \
+  'https://api.wundertreos.com/functions/v1/api-pipelines' \
+  -H 'X-API-Key: YOUR_API_KEY'
+```
+
+```js
+const res = await fetch(
+  "https://api.wundertreos.com/functions/v1/api-pipelines",
+  { headers: { "X-API-Key": apiKey } }
+);
+const { data } = await res.json();
+```
+
+## Response
+
+```json
+{
+  "data": [
+    {
+      "id": "p1a2b3c4-1111-2222-3333-444455556666",
+      "org_id": "a1b2c3d4-1111-2222-3333-444455556666",
+      "name": "Sales",
+      "description": "Default sales pipeline",
+      "is_default": true,
+      "sort_order": 0,
+      "created_at": "2026-04-01T10:00:00Z",
+      "updated_at": "2026-05-17T12:00:00Z",
+      "stages": [
+        {
+          "id": "s1a2b3c4-1111-2222-3333-444455556666",
+          "pipeline_id": "p1a2b3c4-1111-2222-3333-444455556666",
+          "name": "Qualified",
+          "sort_order": 0,
+          "is_won": false,
+          "is_lost": false,
+          "is_qualified": true
+        },
+        {
+          "id": "s2b3c4d5-1111-2222-3333-444455556666",
+          "pipeline_id": "p1a2b3c4-1111-2222-3333-444455556666",
+          "name": "Won",
+          "sort_order": 1,
+          "is_won": true,
+          "is_lost": false,
+          "is_qualified": false
+        }
+      ]
+    }
+  ]
+}
+```
+
+<SchemaTable rows={[
+  { name: "data[].id", type: "uuid", description: "Pipeline ID." },
+  { name: "data[].org_id", type: "uuid", description: "Organization the pipeline belongs to." },
+  { name: "data[].name", type: "string", description: "Display name." },
+  { name: "data[].description", type: "string", nullable: true, description: "Optional description." },
+  { name: "data[].is_default", type: "boolean", description: "Whether this is the org's default pipeline." },
+  { name: "data[].sort_order", type: "integer", description: "Display order among pipelines." },
+  { name: "data[].created_at", type: "string (ISO 8601)" },
+  { name: "data[].updated_at", type: "string (ISO 8601)" },
+  { name: "data[].stages", type: "Stage[]", description: "Stages for this pipeline, ordered by sort_order." },
+  { name: "data[].stages[].id", type: "uuid" },
+  { name: "data[].stages[].pipeline_id", type: "uuid" },
+  { name: "data[].stages[].name", type: "string" },
+  { name: "data[].stages[].sort_order", type: "integer" },
+  { name: "data[].stages[].is_won", type: "boolean", description: "True when deals in this stage are won." },
+  { name: "data[].stages[].is_lost", type: "boolean", description: "True when deals in this stage are lost." },
+  { name: "data[].stages[].is_qualified", type: "boolean", description: "True when this stage marks a deal as qualified." },
+]} />
+
+## Errors
+
+| Status | `error` | When |
+| --- | --- | --- |
+| 403 | `forbidden` | The credential lacks the `crm:read` scope. |
+| 405 | `method_not_allowed` | Method is not `GET`. |
