@@ -61,6 +61,8 @@ curl -X GET \
 
 Each call updates the key's `last_used_at` timestamp so you can audit activity from the dashboard.
 
+API keys authenticate the same REST surface as Bearer tokens, including identity via [`GET /oauth-me`](/oauth/me) — useful for verifying a key still resolves to an organization before making other calls.
+
 <Callout type="warn" title="Treat API keys like passwords">
 Never commit keys to source control or ship them in client‑side code. Use server‑side env vars and revoke keys from the dashboard if you suspect exposure.
 </Callout>

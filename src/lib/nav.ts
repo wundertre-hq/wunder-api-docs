@@ -28,6 +28,13 @@ export const nav: NavSection[] = [
     items: [{ title: "List deals", slug: "deals/list" }],
   },
   {
+    title: "Pipelines",
+    items: [
+      { title: "List pipelines", slug: "pipelines/list" },
+      { title: "List pipeline stages", slug: "pipelines/stages" },
+    ],
+  },
+  {
     title: "Activities",
     items: [{ title: "List activities", slug: "activities/list" }],
   },

@@ -6,6 +6,7 @@ export const meta = {
 ## Rate limits
 
 The API enforces a **sliding window of 60 requests per 60 seconds per organization**, regardless of credential type. Multiple API keys or OAuth tokens belonging to the same org share the same bucket.
+MCP tool calls draw from the same bucket: every `tools/call` on `/mcp` counts as one request against your 60/minute, alongside REST and Zapier polling. See the [MCP overview](/mcp/overview).
 
 Every response includes rate‑limit headers:
 
