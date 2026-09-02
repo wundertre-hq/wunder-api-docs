@@ -10,6 +10,8 @@ export const meta = {
 
 Requires the `contacts:read` scope. Returns deals across all contacts in the caller's organization. Designed to support Zapier polling triggers for "New deal" and "Updated deal".
 
+To resolve `pipeline_id` and `stage_id` values without asking a user to type UUIDs, call [List pipelines](/pipelines/list) or [List pipeline stages](/pipelines/stages).
+
 ## Query parameters
 
 <ParamTable rows={[
@@ -63,8 +65,8 @@ curl -X GET \
   { name: "data[].org_id", type: "uuid" },
   { name: "data[].contact_id", type: "uuid", nullable: true, description: "Linked contact." },
   { name: "data[].company_id", type: "uuid", nullable: true, description: "Linked company." },
-  { name: "data[].pipeline_id", type: "uuid", description: "Pipeline this deal lives in." },
-  { name: "data[].stage_id", type: "uuid", description: "Current stage within the pipeline." },
+  { name: "data[].pipeline_id", type: "uuid", description: "Pipeline this deal lives in. Resolve via [List pipelines](/pipelines/list)." },
+  { name: "data[].stage_id", type: "uuid", description: "Current stage within the pipeline. Resolve via [List pipeline stages](/pipelines/stages)." },
   { name: "data[].title", type: "string" },
   { name: "data[].value", type: "number", nullable: true, description: "Monetary value of the deal." },
   { name: "data[].currency", type: "string", nullable: true, description: "ISO 4217 code (e.g. USD)." },

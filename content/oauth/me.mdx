@@ -36,8 +36,8 @@ curl -X GET 'https://api.wundertreos.com/functions/v1/oauth-me' \
 ```
 
 <SchemaTable rows={[
-  { name: "id", type: "uuid", description: "The authenticated user's ID. For API keys, this is the user who created the key (may be empty if the key was created without a user context)." },
-  { name: "email", type: "string", nullable: true, description: "The user's email." },
+  { name: "id", type: "uuid", nullable: true, description: "The authenticated user's ID. For API keys, this is the user who created the key (`null` if the key has no creator — e.g. the creating user was removed)." },
+  { name: "email", type: "string", nullable: true, description: "The user's email. `null` when `id` is `null`." },
   { name: "org_id", type: "uuid", description: "The organization this credential is scoped to." },
   { name: "org_name", type: "string", description: "Display name of the organization." },
   { name: "org_slug", type: "string", nullable: true, description: "URL‑friendly slug." },

@@ -1,0 +1,80 @@
+export const meta = {
+  title: "List pipeline stages",
+  description: "List the stages of a single pipeline in board order.",
+};
+
+<MethodBadge method="GET" path="/api-pipelines/:id/stages" />
+
+<TryIt method="GET" path="/api-pipelines/:id/stages" />
+
+
+Requires the `crm:read` scope. Works with both Bearer tokens and API keys (`X-API-Key`). Returns the stages for one pipeline, sorted by `sort_order`. Use this when you already know the `pipeline_id` and only need its stage dropdown.
+
+`GET /api-pipelines/:id` without `/stages` returns `404 not_found` — there is no single-pipeline detail route.
+
+## Path parameters
+
+<ParamTable rows={[
+  { name: "id", type: "uuid", required: true, description: "The pipeline ID. Must belong to the caller's organization." },
+]} title="Path" />
+
+## Example request
+
+```bash
+curl -X GET \
+  'https://api.wundertreos.com/functions/v1/api-pipelines/p1a2b3c4-1111-2222-3333-444455556666/stages' \
+  -H 'X-API-Key: YOUR_API_KEY'
+```
+
+```js
+const res = await fetch(
+  `https://api.wundertreos.com/functions/v1/api-pipelines/${pipelineId}/stages`,
+  { headers: { "X-API-Key": apiKey } }
+);
+const { data } = await res.json();
+```
+
+## Response
+
+```json
+{
+  "data": [
+    {
+      "id": "s1a2b3c4-1111-2222-3333-444455556666",
+      "pipeline_id": "p1a2b3c4-1111-2222-3333-444455556666",
+      "name": "Qualified",
+      "sort_order": 0,
+      "is_won": false,
+      "is_lost": false,
+      "is_qualified": true
+    },
+    {
+      "id": "s2b3c4d5-1111-2222-3333-444455556666",
+      "pipeline_id": "p1a2b3c4-1111-2222-3333-444455556666",
+      "name": "Won",
+      "sort_order": 1,
+      "is_won": true,
+      "is_lost": false,
+      "is_qualified": false
+    }
+  ]
+}
+```
+
+<SchemaTable rows={[
+  { name: "data[].id", type: "uuid", description: "Stage ID." },
+  { name: "data[].pipeline_id", type: "uuid", description: "Parent pipeline." },
+  { name: "data[].name", type: "string", description: "Display name." },
+  { name: "data[].sort_order", type: "integer", description: "Board order within the pipeline." },
+  { name: "data[].is_won", type: "boolean", description: "True when deals in this stage are won." },
+  { name: "data[].is_lost", type: "boolean", description: "True when deals in this stage are lost." },
+  { name: "data[].is_qualified", type: "boolean", description: "True when this stage marks a deal as qualified." },
+]} />
+
+## Errors
+
+| Status | `error` | When |
+| --- | --- | --- |
+| 403 | `forbidden` | The credential lacks the `crm:read` scope. |
+| 404 | `not_found` | No pipeline with that ID in the caller's organization. |
+| 405 | `method_not_allowed` | Method is not `GET`. |
