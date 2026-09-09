@@ -1,0 +1,94 @@
+export const meta = {
+  title: "List pipelines",
+  description: "List your pipelines with their ordered stages, so you never have to type a pipeline or stage ID by hand.",
+};
+
+<MethodBadge method="GET" path="/api-pipelines" />
+
+<TryIt method="GET" path="/api-pipelines" />
+
+
+Requires the `crm:read` scope. Returns every pipeline in the caller's organization, each with its stages in board order. Use it to find the `pipeline_id` / `stage_id` values that [Create deal](/deals/create) and [Update deal](/deals/update) accept, and to tell which stage means **won** or **lost**.
+
+## Example request
+
+```bash
+curl -X GET \
+  'https://api.wundertreos.com/functions/v1/api-pipelines' \
+  -H 'Authorization: Bearer YOUR_ACCESS_TOKEN'
+```
+
+## Response
+
+```json
+{
+  "data": [
+    {
+      "id": "p1a2b3c4-1111-2222-3333-444455556666",
+      "org_id": "a1b2c3d4-1111-2222-3333-444455556666",
+      "name": "Sales",
+      "description": null,
+      "is_default": true,
+      "sort_order": 0,
+      "created_at": "2026-04-15T10:00:00Z",
+      "updated_at": "2026-04-15T10:00:00Z",
+      "stages": [
+        { "id": "s1a2b3c4-1111-2222-3333-444455556666", "pipeline_id": "p1a2b3c4-…", "name": "New",         "sort_order": 1, "is_won": false, "is_lost": false, "is_qualified": false },
+        { "id": "s2a2b3c4-1111-2222-3333-444455556666", "pipeline_id": "p1a2b3c4-…", "name": "Qualified",   "sort_order": 2, "is_won": false, "is_lost": false, "is_qualified": true },
+        { "id": "s3a2b3c4-1111-2222-3333-444455556666", "pipeline_id": "p1a2b3c4-…", "name": "Proposal",    "sort_order": 3, "is_won": false, "is_lost": false, "is_qualified": false },
+        { "id": "s4a2b3c4-1111-2222-3333-444455556666", "pipeline_id": "p1a2b3c4-…", "name": "Closed Won",  "sort_order": 4, "is_won": true,  "is_lost": false, "is_qualified": false },
+        { "id": "s5a2b3c4-1111-2222-3333-444455556666", "pipeline_id": "p1a2b3c4-…", "name": "Closed Lost", "sort_order": 5, "is_won": false, "is_lost": true,  "is_qualified": false }
+      ]
+    }
+  ]
+}
+```
+
+<SchemaTable rows={[
+  { name: "data[].id", type: "uuid" },
+  { name: "data[].org_id", type: "uuid" },
+  { name: "data[].name", type: "string" },
+  { name: "data[].description", type: "string", nullable: true },
+  { name: "data[].is_default", type: "boolean", description: "The pipeline a deal lands in when Create deal is called without pipeline_id." },
+  { name: "data[].sort_order", type: "integer" },
+  { name: "data[].created_at", type: "string (ISO 8601)" },
+  { name: "data[].updated_at", type: "string (ISO 8601)" },
+  { name: "data[].stages[].id", type: "uuid", description: "Pass as stage_id to Create deal / Update deal." },
+  { name: "data[].stages[].pipeline_id", type: "uuid" },
+  { name: "data[].stages[].name", type: "string" },
+  { name: "data[].stages[].sort_order", type: "integer", description: "Board order. The lowest is the stage a new deal defaults to." },
+  { name: "data[].stages[].is_won", type: "boolean", description: "Moving a deal here marks it won." },
+  { name: "data[].stages[].is_lost", type: "boolean", description: "Moving a deal here marks it lost." },
+  { name: "data[].stages[].is_qualified", type: "boolean", description: "Reaching this stage counts as a qualified lead for attribution." },
+]} />
+
+## Stages of one pipeline
+
+<MethodBadge method="GET" path="/api-pipelines/:id/stages" />
+
+Returns just the stages of one pipeline, in board order — the same objects as `data[].stages` above. Zapier backs its **Stage** dropdown with this call.
+
+```bash
+curl -X GET \
+  'https://api.wundertreos.com/functions/v1/api-pipelines/p1a2b3c4-1111-2222-3333-444455556666/stages' \
+  -H 'Authorization: Bearer YOUR_ACCESS_TOKEN'
+```
+
+```json
+{
+  "data": [
+    { "id": "s1a2b3c4-…", "pipeline_id": "p1a2b3c4-…", "name": "New", "sort_order": 1, "is_won": false, "is_lost": false, "is_qualified": false }
+  ]
+}
+```
+
+## Errors
+
+| Status | `error` | When |
+| --- | --- | --- |
+| 403 | `forbidden` | The credential lacks the `crm:read` scope. |
+| 404 | `not_found` | `/:id/stages` was called with a pipeline ID that isn't in the caller's organization. |
+
+<Callout type="tip" title="Skip the lookup when you just need to close a deal">
+<a href="/deals/update">Update deal</a> accepts <code>{"{ \"status\": \"won\" }"}</code> and resolves the won stage for you. Use this endpoint when you want to move a deal to a specific intermediate stage.
+</Callout>

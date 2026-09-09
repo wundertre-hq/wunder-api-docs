@@ -1,0 +1,84 @@
+export const meta = {
+  title: "Get deal",
+  description: "Retrieve a single deal by ID.",
+};
+
+<MethodBadge method="GET" path="/api-deals/:id" />
+
+<TryIt method="GET" path="/api-deals/:id" />
+
+
+Requires the `crm:read` scope (the legacy `contacts:read` alias also works).
+
+## Path parameters
+
+<ParamTable rows={[
+  { name: "id", type: "uuid", required: true, description: "The deal ID. Must belong to the caller's organization." },
+]} title="Path" />
+
+## Example request
+
+```bash
+curl -X GET \
+  'https://api.wundertreos.com/functions/v1/api-deals/d1e2f3a4-1111-2222-3333-444455556666' \
+  -H 'Authorization: Bearer YOUR_ACCESS_TOKEN'
+```
+
+## Response
+
+```json
+{
+  "data": {
+    "id": "d1e2f3a4-1111-2222-3333-444455556666",
+    "org_id": "a1b2c3d4-1111-2222-3333-444455556666",
+    "contact_id": "c8b1f3a0-4d2e-4f9a-9b1c-2d4e5f6a7b8c",
+    "company_id": null,
+    "pipeline_id": "p1a2b3c4-1111-2222-3333-444455556666",
+    "stage_id": "s1a2b3c4-1111-2222-3333-444455556666",
+    "title": "Acme — Annual plan",
+    "value": 12000,
+    "currency": "USD",
+    "expected_close_date": "2026-06-30",
+    "assigned_to": "u1b1f3a0-4d2e-4f9a-9b1c-2d4e5f6a7b8c",
+    "notes": null,
+    "won_at": null,
+    "lost_at": null,
+    "lost_reason": null,
+    "created_at": "2026-05-01T10:00:00Z",
+    "updated_at": "2026-05-17T12:00:00Z",
+    "created_by": "u1b1f3a0-4d2e-4f9a-9b1c-2d4e5f6a7b8c"
+  }
+}
+```
+
+<SchemaTable rows={[
+  { name: "data.id", type: "uuid" },
+  { name: "data.org_id", type: "uuid" },
+  { name: "data.contact_id", type: "uuid", nullable: true, description: "Linked contact." },
+  { name: "data.company_id", type: "uuid", nullable: true, description: "Linked company." },
+  { name: "data.pipeline_id", type: "uuid", description: "Pipeline this deal lives in." },
+  { name: "data.stage_id", type: "uuid", description: "Current stage within the pipeline. Resolve names and won/lost flags via List pipelines." },
+  { name: "data.title", type: "string" },
+  { name: "data.value", type: "number", description: "Monetary value of the deal. 0 when unset." },
+  { name: "data.currency", type: "string", description: "ISO 4217 code (e.g. USD)." },
+  { name: "data.expected_close_date", type: "string (ISO 8601 date)", nullable: true },
+  { name: "data.assigned_to", type: "uuid", nullable: true, description: "Owner user ID." },
+  { name: "data.notes", type: "string", nullable: true },
+  { name: "data.won_at", type: "string (ISO 8601)", nullable: true, description: "When the deal last entered a won stage. Historical — the current stage is the source of truth." },
+  { name: "data.lost_at", type: "string (ISO 8601)", nullable: true, description: "When the deal last entered a lost stage." },
+  { name: "data.lost_reason", type: "string", nullable: true },
+  { name: "data.created_at", type: "string (ISO 8601)" },
+  { name: "data.updated_at", type: "string (ISO 8601)" },
+  { name: "data.created_by", type: "uuid", nullable: true },
+]} />
+
+<Callout type="info" title="Is this deal won?">
+Check whether <code>stage_id</code> points at a stage with <code>is_won: true</code> (see <a href="/pipelines/list">List pipelines</a>). <code>won_at</code> is set when a deal enters a won stage and is kept as history if the deal is later moved back to an open stage, so it alone does not mean the deal is currently won.
+</Callout>
+
+## Errors
+
+| Status | `error` | When |
+| --- | --- | --- |
+| 403 | `forbidden` | The credential lacks the `crm:read` scope. |
+| 404 | `not_found` | No deal with that ID in the caller's organization. |

@@ -25,7 +25,16 @@ export const nav: NavSection[] = [
   },
   {
     title: "Deals",
-    items: [{ title: "List deals", slug: "deals/list" }],
+    items: [
+      { title: "List deals", slug: "deals/list" },
+      { title: "Get deal", slug: "deals/get" },
+      { title: "Create deal", slug: "deals/create" },
+      { title: "Update deal", slug: "deals/update" },
+    ],
+  },
+  {
+    title: "Pipelines",
+    items: [{ title: "List pipelines", slug: "pipelines/list" }],
   },
   {
     title: "Activities",
