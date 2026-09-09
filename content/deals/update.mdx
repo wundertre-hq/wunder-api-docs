@@ -1,0 +1,126 @@
+export const meta = {
+  title: "Update deal",
+  description: "Patch fields on a deal, move it between stages, or mark it won or lost.",
+};
+
+<MethodBadge method="PATCH" path="/api-deals/:id" />
+
+<TryIt method="PATCH" path="/api-deals/:id" body={`{
+  "value": 12000,
+  "status": "won"
+}`} />
+
+
+Requires the `crm:write` scope (the legacy `contacts:write` alias also works). Only fields you include are updated; everything else is left untouched. Unknown fields are silently dropped.
+
+## Path parameters
+
+<ParamTable rows={[
+  { name: "id", type: "uuid", required: true, description: "The deal ID. Must belong to the caller's organization." },
+]} title="Path" />
+
+## Request body
+
+<ParamTable rows={[
+  { name: "title", type: "string", description: "New deal name. Must be non-empty." },
+  { name: "value", type: "number | string", description: "Monetary value. Strings such as \"$1,200.50\" are parsed." },
+  { name: "currency", type: "string", description: "ISO 4217 code. Upper-cased on save. Cannot be null." },
+  { name: "expected_close_date", type: "string (YYYY-MM-DD) | null", description: "Send null to clear." },
+  { name: "notes", type: "string | null", description: "Replaces the deal's notes. Send null to clear." },
+  { name: "contact_id", type: "uuid | null", description: "Link to a contact in your org, or null to unlink." },
+  { name: "company_id", type: "uuid | null", description: "Link to a company in your org, or null to unlink." },
+  { name: "stage_id", type: "uuid", description: "Move the deal to this stage. Must belong to the deal's current pipeline. Mutually exclusive with status." },
+  { name: "status", type: "\"won\" | \"lost\"", description: "Close the deal without knowing a stage ID: moves it to the pipeline's stage flagged won / lost and stamps won_at / lost_at. Mutually exclusive with stage_id." },
+  { name: "lost_reason", type: "string | null", description: "Why the deal was lost. Usually sent with status: \"lost\", but can be set on its own." },
+]} title="Body" />
+
+System fields (`id`, `org_id`, `pipeline_id`, `assigned_to`, `won_at`, `lost_at`, `created_at`, `updated_at`, `created_by`) cannot be set via this endpoint. A deal cannot be moved to a different pipeline.
+
+## Moving stages and closing deals
+
+The endpoint does everything the app does when you drag a card on the board, so a deal updated by API is indistinguishable from one updated by hand:
+
+- **Moving to any stage** writes a `stage_change` activity on the deal and a `deal_stage_change` activity on the linked contact, and records an audit event.
+- **Entering a stage flagged `is_won`** (via `stage_id` or `status: "won"`) also sets `won_at` to now and clears `lost_at` / `lost_reason`. This fires the same downstream effects as winning the deal in the app: **Deal won** workflow triggers, ad-platform purchase conversions, and the [`deal.updated`](/webhooks/events) webhook.
+- **Entering a stage flagged `is_lost`** (via `stage_id` or `status: "lost"`) sets `lost_at` to now and clears `won_at`.
+- **Moving back to an open stage** leaves `won_at` / `lost_at` alone — they are history. The current stage decides whether a deal counts as won.
+- **Changing `value`** writes a `value_change` activity on the deal.
+
+`status` is the easy path for integrations: `{ "status": "won" }` needs no lookup. If the deal's pipeline has no stage flagged won (or lost), the timestamp is still recorded, the deal stays in its current stage, and the response carries a `meta.warning` explaining that. Flag a stage in **Settings → Pipelines** to fix it.
+
+Re-sending `status: "won"` to a deal that is already won is a no-op that returns `200` with the unchanged deal, so re-running a Zap or a webhook retry is safe.
+
+## Example: mark a deal won
+
+```bash
+curl -X PATCH \
+  'https://api.wundertreos.com/functions/v1/api-deals/d1e2f3a4-1111-2222-3333-444455556666' \
+  -H 'Authorization: Bearer YOUR_ACCESS_TOKEN' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "title": "Acme — Annual plan (signed)",
+    "value": 12000,
+    "status": "won"
+  }'
+```
+
+## Example: move to a specific stage
+
+Look the stage up first with [List pipelines](/pipelines/list), then:
+
+```bash
+curl -X PATCH \
+  'https://api.wundertreos.com/functions/v1/api-deals/d1e2f3a4-1111-2222-3333-444455556666' \
+  -H 'Authorization: Bearer YOUR_ACCESS_TOKEN' \
+  -H 'Content-Type: application/json' \
+  -d '{ "stage_id": "s3a2b3c4-1111-2222-3333-444455556666" }'
+```
+
+## Example: mark a deal lost
+
+```bash
+curl -X PATCH \
+  'https://api.wundertreos.com/functions/v1/api-deals/d1e2f3a4-1111-2222-3333-444455556666' \
+  -H 'Authorization: Bearer YOUR_ACCESS_TOKEN' \
+  -H 'Content-Type: application/json' \
+  -d '{ "status": "lost", "lost_reason": "Went with a competitor" }'
+```
+
+## Response
+
+Returns the updated deal (same shape as [Get deal](/deals/get)):
+
+```json
+{
+  "data": {
+    "id": "d1e2f3a4-1111-2222-3333-444455556666",
+    "title": "Acme — Annual plan (signed)",
+    "value": 12000,
+    "stage_id": "s4a2b3c4-1111-2222-3333-444455556666",
+    "won_at": "2026-09-09T15:00:00Z",
+    "lost_at": null,
+    "lost_reason": null,
+    "updated_at": "2026-09-09T15:00:00Z"
+  }
+}
+```
+
+When `status` was sent but the pipeline has no matching flagged stage:
+
+```json
+{
+  "data": { "id": "d1e2f3a4-…", "stage_id": "s1a2b3c4-…", "won_at": "2026-09-09T15:00:00Z" },
+  "meta": {
+    "warning": "Won recorded, but this pipeline has no stage flagged as won, so the deal stayed in its current stage."
+  }
+}
+```
+
+## Errors
+
+| Status | `error` | When |
+| --- | --- | --- |
+| 400 | `invalid_request` | The body has no updatable fields or is not valid JSON; `title` is empty; `value` is not numeric; `expected_close_date` is not `YYYY-MM-DD`; `status` is not `won` or `lost`; both `stage_id` and `status` were sent; `stage_id` is not in the deal's pipeline; or `contact_id` / `company_id` doesn't exist in your organization. |
+| 403 | `forbidden` | The credential lacks the `crm:write` scope. |
+| 404 | `not_found` | No deal with that ID in the caller's organization. |
+| 500 | `server_error` | Database write failed. |

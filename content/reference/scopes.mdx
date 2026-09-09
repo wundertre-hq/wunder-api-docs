@@ -27,8 +27,8 @@ Today the REST API surfaces the `crm` and `webhooks` families; the other familie
 ## What each REST endpoint requires
 
 <SchemaTable title="REST scope requirements" rows={[
-  { name: "crm:read", type: "scope", description: "GET /api-deals, GET /api-activities, POST /api-contacts-search. GET /api-contacts and its sub-resources (/:id, /:id/deals, /:id/activities) only require a valid credential — no explicit scope check." },
-  { name: "crm:write", type: "scope", description: "POST /api-contacts, PATCH /api-contacts/:id, DELETE /api-contacts/:id. Implies crm:read." },
+  { name: "crm:read", type: "scope", description: "GET /api-deals, GET /api-deals/:id, GET /api-pipelines, GET /api-pipelines/:id/stages, GET /api-activities, POST /api-contacts-search. GET /api-contacts and its sub-resources (/:id, /:id/deals, /:id/activities) only require a valid credential — no explicit scope check." },
+  { name: "crm:write", type: "scope", description: "POST /api-contacts, PATCH /api-contacts/:id, DELETE /api-contacts/:id, POST /api-contacts/:id/tags, POST /api-deals, PATCH /api-deals/:id. Implies crm:read." },
   { name: "webhooks:read", type: "scope", description: "GET /api-webhook-subscriptions and GET /api-webhook-subscriptions/:id." },
   { name: "webhooks:write", type: "scope", description: "POST /api-webhook-subscriptions and DELETE /api-webhook-subscriptions/:id. Implies webhooks:read." },
 ]} />

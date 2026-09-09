@@ -1,0 +1,90 @@
+export const meta = {
+  title: "Create deal",
+  description: "Create a new deal in a pipeline, optionally linked to a contact or company.",
+};
+
+<MethodBadge method="POST" path="/api-deals" />
+
+<TryIt method="POST" path="/api-deals" body={`{
+  "title": "Acme — Annual plan",
+  "value": 12000,
+  "contact_id": "c8b1f3a0-4d2e-4f9a-9b1c-2d4e5f6a7b8c"
+}`} />
+
+
+Requires the `crm:write` scope (the legacy `contacts:write` alias also works). Returns `201 Created` with the new deal.
+
+## Request body
+
+Only `title` is required. If you omit `pipeline_id` the deal lands in your organization's **default pipeline**; if you omit `stage_id` it lands in that pipeline's **first stage**. Use [List pipelines](/pipelines/list) to look up IDs when you want to target a specific pipeline or stage. Unknown fields are ignored.
+
+<ParamTable rows={[
+  { name: "title", type: "string", required: true, description: "Deal name as it appears on the board." },
+  { name: "value", type: "number | string", description: "Monetary value. Strings such as \"$1,200.50\" are parsed; an empty string or omitted value is stored as 0." },
+  { name: "currency", type: "string", description: "ISO 4217 code (e.g. USD). Upper-cased on save. Defaults to USD." },
+  { name: "contact_id", type: "uuid", description: "Link to a contact. Must belong to your organization." },
+  { name: "company_id", type: "uuid", description: "Link to a company. Must belong to your organization." },
+  { name: "pipeline_id", type: "uuid", description: "Pipeline to create the deal in. Defaults to the org's default pipeline." },
+  { name: "stage_id", type: "uuid", description: "Stage within that pipeline. Defaults to the pipeline's first stage. Must belong to the resolved pipeline." },
+  { name: "expected_close_date", type: "string (ISO 8601 date)", description: "e.g. 2026-06-30." },
+  { name: "notes", type: "string", description: "Free-text notes on the deal." },
+]} title="Body" />
+
+## Example request
+
+```bash
+curl -X POST \
+  'https://api.wundertreos.com/functions/v1/api-deals' \
+  -H 'Authorization: Bearer YOUR_ACCESS_TOKEN' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "title": "Acme — Annual plan",
+    "value": 12000,
+    "currency": "USD",
+    "contact_id": "c8b1f3a0-4d2e-4f9a-9b1c-2d4e5f6a7b8c",
+    "expected_close_date": "2026-06-30"
+  }'
+```
+
+## Response
+
+Returns the created deal (same shape as [Get deal](/deals/get)):
+
+```json
+{
+  "data": {
+    "id": "d1e2f3a4-1111-2222-3333-444455556666",
+    "org_id": "a1b2c3d4-1111-2222-3333-444455556666",
+    "contact_id": "c8b1f3a0-4d2e-4f9a-9b1c-2d4e5f6a7b8c",
+    "company_id": null,
+    "pipeline_id": "p1a2b3c4-1111-2222-3333-444455556666",
+    "stage_id": "s1a2b3c4-1111-2222-3333-444455556666",
+    "title": "Acme — Annual plan",
+    "value": 12000,
+    "currency": "USD",
+    "expected_close_date": "2026-06-30",
+    "assigned_to": null,
+    "notes": null,
+    "won_at": null,
+    "lost_at": null,
+    "lost_reason": null,
+    "created_at": "2026-05-17T14:00:00Z",
+    "updated_at": "2026-05-17T14:00:00Z",
+    "created_by": "u1b1f3a0-4d2e-4f9a-9b1c-2d4e5f6a7b8c"
+  }
+}
+```
+
+Creating a deal emits a [`deal.created`](/webhooks/events) webhook event and fires any **Deal created** workflow triggers, exactly as if it had been created in the app.
+
+## Errors
+
+| Status | `error` | When |
+| --- | --- | --- |
+| 400 | `invalid_request` | `title` is missing; `value` is not numeric; `pipeline_id`, `stage_id`, `contact_id`, or `company_id` doesn't exist in your organization; the org has no pipelines yet; or the body is not valid JSON. |
+| 403 | `forbidden` | The credential lacks the `crm:write` scope. |
+| 500 | `server_error` | Database write failed. |
+
+<Callout type="tip" title="Creating a deal that is already closed">
+There is no "create as won" flag. Create the deal, then call <a href="/deals/update">Update deal</a> with <code>{"{ \"status\": \"won\" }"}</code> — that moves it to the pipeline's won stage and stamps <code>won_at</code> in one request.
+</Callout>

@@ -39,11 +39,23 @@ Adds/merges tag(s) onto a contact. Idempotent and case‑insensitive — re‑ru
 
 ### Create Deal
 
-`POST /api-deals`
+`POST /api-deals` — see [Create deal](/deals/create).
 
-Required: `title`. Optional: `contact_id`, `value`, `pipeline_id`, `stage_id`, plus any other fields exposed in the Zapier action.
+Required: `title`. Optional: `contact_id`, `company_id`, `value`, `currency`, `pipeline_id`, `stage_id`, `expected_close_date`, `notes`.
 
-If `pipeline_id` / `stage_id` are omitted, the API places the deal in the org's default pipeline and its first stage. In Zapier, pipeline and stage are optional dropdowns populated from `GET /api-pipelines`.
+If `pipeline_id` / `stage_id` are omitted, the API places the deal in the org's default pipeline and its first stage. In Zapier, pipeline and stage are optional dropdowns populated from [`GET /api-pipelines`](/pipelines/list).
+
+### Update Deal
+
+`PATCH /api-deals/:id` — see [Update deal](/deals/update).
+
+Only fields you populate in the Zap are sent in the body. Updatable: `title`, `value`, `currency`, `expected_close_date`, `notes`, `contact_id`, `company_id`, `stage_id`, `lost_reason`.
+
+### Mark Deal Won / Lost
+
+`PATCH /api-deals/:id` with `{ "status": "won" }` or `{ "status": "lost", "lost_reason": "…" }` — see [Update deal](/deals/update).
+
+Moves the deal to the pipeline's won / lost stage and stamps `won_at` / `lost_at`, exactly as dragging the card in the app does — workflow triggers, purchase conversions, and `deal.updated` webhooks all fire. Typical use: a "Sold" event in your order system marks the matching WundertreOS deal won.
 
 
 <Callout type="tip" title="Idempotent Find + Create">
