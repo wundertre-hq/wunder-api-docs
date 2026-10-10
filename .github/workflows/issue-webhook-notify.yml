@@ -1,0 +1,55 @@
+name: Issue webhook notify
+
+# Tells the Grok Bot issue routine about a new or reopened issue, so triage is
+# event-driven instead of waiting for the poll. The webhook URL and key live
+# only in secrets (GROK_ISSUE_WEBHOOK_URL, GROK_ISSUE_WEBHOOK_AUTH = full Authorization header value, ideally set
+# at org level). If the URL secret is unset, the job skips with a notice.
+#
+# Event fields reach the script only through env vars, never ${{ }} inside
+# run:, so an issue title can't inject shell.
+
+on:
+  issues:
+    types: [opened, reopened]
+
+permissions: {}
+
+jobs:
+  notify:
+    name: Notify Grok issue webhook
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: POST issue to webhook
+        env:
+          GROK_ISSUE_WEBHOOK_URL: ${{ secrets.GROK_ISSUE_WEBHOOK_URL }}
+          GROK_ISSUE_WEBHOOK_AUTH: ${{ secrets.GROK_ISSUE_WEBHOOK_AUTH }}
+          REPO: ${{ github.repository }}
+          ACTION: ${{ github.event.action }}
+          NUMBER: ${{ github.event.issue.number }}
+          TITLE: ${{ github.event.issue.title }}
+          URL: ${{ github.event.issue.html_url }}
+          AUTHOR: ${{ github.event.issue.user.login }}
+          LABELS_JSON: ${{ toJSON(github.event.issue.labels) }}
+        run: |
+          set -euo pipefail
+          if [ -z "${GROK_ISSUE_WEBHOOK_URL:-}" ]; then
+            echo "::notice::GROK_ISSUE_WEBHOOK_URL is not set; skipping issue webhook."
+            exit 0
+          fi
+          payload="$(jq -n \
+            --arg repo "$REPO" \
+            --arg action "$ACTION" \
+            --argjson number "$NUMBER" \
+            --arg title "$TITLE" \
+            --arg url "$URL" \
+            --arg author "$AUTHOR" \
+            --argjson labels "$LABELS_JSON" \
+            '{repo: $repo, action: $action, number: $number, title: $title, url: $url, author: $author, labels: [($labels // [])[] | .name]}')"
+          curl --silent --show-error --fail-with-body --max-time 20 --retry 2 \
+            -X POST "$GROK_ISSUE_WEBHOOK_URL" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: ${GROK_ISSUE_WEBHOOK_AUTH:-}" \
+            --data "$payload"
+          echo
+          echo "Sent $REPO#$NUMBER ($ACTION) to the issue webhook."
