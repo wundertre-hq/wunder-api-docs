@@ -1,0 +1,63 @@
+name: Bug or feature
+description: Report a bug or request a change. Short, but complete enough to hand off cold.
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Write the minimum someone needs to take this over cold.** Facts and links, not narrative. Don't repeat across fields. Label guesses as unverified. Write `n/a` rather than filler.
+
+        - **Security issue** (vulnerability, leaked secret, data exposure)? Don't file it here; report it privately per SECURITY.md.
+        - **No secrets, tokens, or customer contact/personal details**, including in screenshots and logs. Identify customers by internal ID.
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What's wrong or wanted
+      description: "1–3 sentences. Bug: actual vs. expected. Feature: the outcome needed and why."
+      placeholder: "CSV export returns 500; expected a file download."
+    validations:
+      required: true
+
+  - type: input
+    id: where
+    attributes:
+      label: Where it happens
+      description: "Environment, URL/screen or service/file, version or commit."
+      placeholder: "prod, /reports/export, v2.14.0 (abc1234)"
+    validations:
+      required: true
+
+  # A checkbox, not markdown: markdown isn't included in the filed issue, and this rule must reach whoever picks it up.
+  - type: checkboxes
+    id: ui-readonly
+    attributes:
+      label: UI testing
+      description: Applies to the reporter and to anyone who works this issue.
+      options:
+        - label: "UI testing must be read-only whenever possible, especially on production; never trigger a write action in the UI (HO-STANDING-UI-READONLY-20261008)."
+          required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: How to reproduce / acceptance criteria
+      description: "Bug: minimal numbered steps; if a step is a write action, mark it and don't perform it. Feature: testable acceptance criteria."
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence links
+      description: "Logs, traces, redacted screenshots, PRs/commits, source thread (Slack, ticket). If a link may expire or needs special access, also quote the key line."
+    validations:
+      required: true
+
+  - type: textarea
+    id: state
+    attributes:
+      label: Current state / next step
+      description: "What's confirmed, tried, or ruled out; any workaround or blocker; the next concrete action."
+      placeholder: "Reproduced on prod and staging, not locally. Next: check export-worker logs for the request ID."
+    validations:
+      required: true
