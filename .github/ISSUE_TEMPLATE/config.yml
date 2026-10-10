@@ -1,0 +1,2 @@
+# Without this, blank issues bypass the form.
+blank_issues_enabled: false
